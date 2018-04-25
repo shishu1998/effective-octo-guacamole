@@ -3,8 +3,8 @@
 #include "FlareMap.h"
 #include <vector>
 #include <SDL_mixer.h>
-#define levelFILE "Alien.txt"
-#define Solids {61,62,68,92,94,490,579}
+#define levelFILE "map01.txt"
+#define Solids {122, 123, 124, 125, 130,152, 155}
 
 class GameState {
 public:

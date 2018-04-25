@@ -59,7 +59,7 @@ void processGameState(GameState& state) {
 	}
 	if (keys[SDL_SCANCODE_SPACE]) {
 		if (state.player.collidedBottom) {
-			state.player.velocity.y = 0.4;
+			state.player.velocity.y = 1.0;
 			Mix_PlayChannel(-1, state.jump, 0);
 		}
 	}

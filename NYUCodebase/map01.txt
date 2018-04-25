@@ -41,43 +41,43 @@ data=
 153,153,153,153,153,153,153,153,41,41,41,153,153,153,153,153,153,153,153,41,41,41,41,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,
 153,153,153,153,153,153,153,153,41,41,41,153,153,153,153,153,153,153,153,41,41,41,41,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153
 
-[Object Layer]
+[ObjectsLayer]
 # block2
 type=ROTATING
 location=26,19,1,1
 
-[Object Layer]
+[ObjectsLayer]
 # block3
 type=ROTATING
 location=31,15,1,1
 
-[Object Layer]
+[ObjectsLayer]
 # block1
 type=ROTATING
 location=20,8,1,1
 
-[Object Layer]
+[ObjectsLayer]
 # block5
 type=ROTATING
 location=68,16,1,1
 
-[Object Layer]
+[ObjectsLayer]
 # block4
 type=ROTATING
 location=46,18,1,1
 
-[Object Layer]
+[ObjectsLayer]
 # player
-type=PLAYER
+type=Player
 location=12,22,1,1
 
-[Object Layer]
+[ObjectsLayer]
 # enemy2
-type=ENEMY
+type=Enemy
 location=42,19,1,1
 
-[Object Layer]
+[ObjectsLayer]
 # enemy1
-type=ENEMY
+type=Enemy
 location=33,21,1,1
 
