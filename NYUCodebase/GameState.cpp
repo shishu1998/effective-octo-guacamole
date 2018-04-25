@@ -30,11 +30,11 @@ void GameState::updateGameState(float elapsed) {
 		entities[i].Update(elapsed, map.mapData, solidTiles);
 		//Reverses the movement of NPCs if there is collision against tiles
 		if (entities[i].collidedLeft) {
-			entities[i].acceleration.x = 0.3;
+			entities[i].acceleration.x = 0.0;
 			entities[i].forward = false;
 		}
 		if (entities[i].collidedRight) {
-			entities[i].acceleration.x = -0.3;
+			entities[i].acceleration.x = -0.0;
 			entities[i].forward = true;
 		}
 	}
@@ -50,15 +50,37 @@ void GameState::updateGameState(float elapsed) {
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
 }
 
+void GameState::processKeys(const Uint8 * keys)
+{
+	if (keys[SDL_SCANCODE_A]) {
+		player.acceleration.x = -0.6;
+		player.forward = false;
+	}
+	if (keys[SDL_SCANCODE_D]) {
+		player.acceleration.x = 0.6;
+		player.forward = true;
+	}
+	if (keys[SDL_SCANCODE_SPACE]) {
+		if (player.collidedBottom) {
+			player.velocity.y = 1.0;
+			Mix_PlayChannel(-1, jump, 0);
+		}
+	}
+	if (!(keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_SPACE])) {
+		player.acceleration.x = 0.0;
+		player.acceleration.y = 0.0;
+	}
+}
+
 //Creates entities based on the string type
 void GameState::PlaceEntity(std::string type, float x, float y)
 {
 	if (type == "Player") {
-		player = Entity(x, y, createSheetSpriteBySpriteIndex(TextureID, 28, tileSize), Player, false);
+		player = Entity(x, y, createSheetSpriteBySpriteIndex(TextureID, 110, tileSize), Player, false);
 	}
 	else if (type == "Enemy") {
-		Entity enemy = Entity(x, y, createSheetSpriteBySpriteIndex(TextureID, 446, tileSize), Enemy, false);
-		enemy.acceleration.x = -0.3;
+		Entity enemy = Entity(x, y, createSheetSpriteBySpriteIndex(TextureID, 445, tileSize), Enemy, false);
+		enemy.acceleration.x = 0.0;
 		entities.emplace_back(enemy);
 	}
 }

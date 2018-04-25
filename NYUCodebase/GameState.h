@@ -2,9 +2,10 @@
 #include "Entity.h"
 #include "FlareMap.h"
 #include <vector>
+#include <SDL.h>
 #include <SDL_mixer.h>
-#define levelFILE "Alien.txt"
-#define Solids {61,62,68,92,94,490,579}
+#define levelFILE "map01.txt"
+#define Solids {122, 123, 124, 125, 130,152, 155}
 
 class GameState {
 public:
@@ -23,6 +24,7 @@ public:
 	void initEntities();
 	void reset();
 	void updateGameState(float elapsed);
+	void processKeys(const Uint8 *keys);
 	void PlaceEntity(std::string type, float x, float y);
 	void Render(ShaderProgram &program);
 	void GameState::playBackgroundMusic() const;
