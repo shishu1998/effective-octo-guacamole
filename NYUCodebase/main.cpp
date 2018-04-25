@@ -2,7 +2,6 @@
 #include <GL/glew.h>
 #endif
 #define STB_IMAGE_IMPLEMENTATION
-#include <SDL.h>
 #include <SDL_opengl.h>
 #include <SDL_image.h>
 #include "ShaderProgram.h"
@@ -43,30 +42,9 @@ void init() {
 	projectionMatrix.SetOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
 	program.SetProjectionMatrix(projectionMatrix);
 	glUseProgram(program.programID);
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(0.553, 0.765, 0.855, 0.0);
 
 	state.loadResources();
-}
-
-void processGameState(GameState& state) {
-	if (keys[SDL_SCANCODE_A]) {
-		state.player.acceleration.x = -0.2;
-		state.player.forward = false;
-	}
-	if (keys[SDL_SCANCODE_D]) {
-		state.player.acceleration.x = 0.2;
-		state.player.forward = true;
-	}
-	if (keys[SDL_SCANCODE_SPACE]) {
-		if (state.player.collidedBottom) {
-			state.player.velocity.y = 1.0;
-			Mix_PlayChannel(-1, state.jump, 0);
-		}
-	}
-	if(!(keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_SPACE])) {
-		state.player.acceleration.x = 0.0;
-		state.player.acceleration.y = 0.0;
-	}
 }
 
 void updateGameState(GameState& state, float elapsed) {
@@ -86,7 +64,7 @@ int main(int argc, char *argv[])
 				done = true;
 			}
 		}
-		processGameState(state);
+		state.processKeys(keys);
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
 		elapsed = ticks - lastFrameTicks;
 		lastFrameTicks = ticks;

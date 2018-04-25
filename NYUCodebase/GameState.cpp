@@ -50,6 +50,28 @@ void GameState::updateGameState(float elapsed) {
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
 }
 
+void GameState::processKeys(const Uint8 * keys)
+{
+	if (keys[SDL_SCANCODE_A]) {
+		player.acceleration.x = -0.6;
+		player.forward = false;
+	}
+	if (keys[SDL_SCANCODE_D]) {
+		player.acceleration.x = 0.6;
+		player.forward = true;
+	}
+	if (keys[SDL_SCANCODE_SPACE]) {
+		if (player.collidedBottom) {
+			player.velocity.y = 1.0;
+			Mix_PlayChannel(-1, jump, 0);
+		}
+	}
+	if (!(keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_SPACE])) {
+		player.acceleration.x = 0.0;
+		player.acceleration.y = 0.0;
+	}
+}
+
 //Creates entities based on the string type
 void GameState::PlaceEntity(std::string type, float x, float y)
 {
