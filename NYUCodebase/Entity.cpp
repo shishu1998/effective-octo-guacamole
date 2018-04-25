@@ -6,8 +6,8 @@ Entity::Entity() : textured(false) {}
 Entity::Entity(float x, float y, float width, float height, bool isStatic) : Position(x, y, 0), size(width, height, 0), isStatic(isStatic),textured(false) {
 	matrix.Translate(Position.x, Position.y, 0);
 }
-Entity::Entity(float x, float y, SheetSprite sprite, EntityType type, bool isStatic) : Position(x,y,0), 
-size(sprite.width * sprite.size/ sprite.height, sprite.size, 0), sprite(sprite), entityType(type), isStatic(isStatic), textured(true) {
+Entity::Entity(float x, float y, std::vector<SheetSprite> sprites, EntityType type, bool isStatic) : Position(x,y,0), 
+size(sprites[0].width * sprites[0].size/ sprites[0].height, sprites[0].size, 0), sprites(sprites), entityType(type), isStatic(isStatic), textured(true) {
 	matrix.Translate(Position.x, Position.y, 0);
 }
 
@@ -36,8 +36,8 @@ void Entity::Render(ShaderProgram & Program, Matrix viewMatrix)
 
 	Program.SetModelMatrix(modelMatrix);
 	Program.SetViewMatrix(viewMatrix);
-
-	textured ? sprite.Draw(&Program) : UntexturedDraw(Program);
+	 
+	textured ? sprites[spriteIndex].Draw(&Program) : UntexturedDraw(Program);
 }
 
 //Resets contact flags
@@ -137,6 +137,20 @@ void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>&
 		Position.y += displacementY;
 		if (solids.find(mapData[gridTop][gridX]) != solids.end()) TileCollideTop(gridTop);
 		if (solids.find(mapData[gridBottom][gridX]) != solids.end()) TileCollideBottom(gridBottom);
+
+		// Sprite index update
+		if (fabs(velocity.x) > 0.05) {
+			animationTimer += elapsed;
+			//Animation update time should be inversely proportional to the velocity
+			if (animationTimer > AnimationConstant/fabs(velocity.x)) {
+				spriteIndex = (spriteIndex + 1) % sprites.size();
+				animationTimer = 0;
+			}
+		}
+		else {
+			// Reset sprite index if too slow/not moving
+			spriteIndex = 0;
+		}
 	}
 	remakeMatrix();
 }

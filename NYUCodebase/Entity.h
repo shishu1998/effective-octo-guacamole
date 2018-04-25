@@ -6,13 +6,14 @@
 #include "Vector4.h"
 #define Friction_X 1.0f
 #define GRAVITY -0.8f
+#define AnimationConstant 0.2f
 
 enum EntityType {Player, Enemy};
 class Entity {
 public:
 	Entity();
 	Entity(float x, float y, float width, float height, bool isStatic);
-	Entity(float x, float y, SheetSprite sprite, EntityType type, bool isStatic);
+	Entity(float x, float y, std::vector<SheetSprite> sprites, EntityType type, bool isStatic);
 	void UntexturedDraw(ShaderProgram & Program);
 	void Render(ShaderProgram &Program, Matrix viewMatrix);
 	void ResetContactFlags();
@@ -30,7 +31,9 @@ public:
 	void remakeMatrix();
 	bool SATCollidesWith(Entity& Other);
 
-	SheetSprite sprite;
+	std::vector<SheetSprite> sprites;
+	unsigned int spriteIndex = 0;
+	float animationTimer = 0;
 
 	Vector4 Position;
 	Vector4 size;
