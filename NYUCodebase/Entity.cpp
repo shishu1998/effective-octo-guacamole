@@ -138,6 +138,9 @@ void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>&
 		if (solids.find(mapData[gridTop][gridX]) != solids.end()) TileCollideTop(gridTop);
 		if (solids.find(mapData[gridBottom][gridX]) != solids.end()) TileCollideBottom(gridBottom);
 
+		// Apply kinetic friction if dropping down a wall
+		if(collidedLeft || collidedRight)
+			velocity.y = lerp(velocity.y, 0.0f, elapsed * Friction_Y);
 		UpdateAnimation(elapsed);
 	}
 	remakeMatrix();
