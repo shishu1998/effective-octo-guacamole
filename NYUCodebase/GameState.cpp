@@ -45,6 +45,7 @@ void GameState::updateGameState(float elapsed) {
 			Mix_PlayChannel(-1, ghost, 0);
 		}
 	}
+	//Player restarts when touches water
 	int gridX, gridY;
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {

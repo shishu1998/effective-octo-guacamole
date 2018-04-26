@@ -130,13 +130,13 @@ void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>&
 
 		// X TileCollision 
 		Position.x += displacementX;
-		if (solids.find(mapData[gridY][gridLeft]) != solids.end()) TileCollideLeft(gridLeft);
-		if (solids.find(mapData[gridY][gridRight]) != solids.end()) TileCollideRight(gridRight);
+		if (solids.find(mapData[gridY][gridLeft]) != solids.end()) TileCollideLeft(gridLeft); //LeftCenter
+		if (solids.find(mapData[gridY][gridRight]) != solids.end()) TileCollideRight(gridRight); //RightCenter
 
 		// Y TileCollision
 		Position.y += displacementY;
-		if (solids.find(mapData[gridTop][gridX]) != solids.end()) TileCollideTop(gridTop);
-		if (solids.find(mapData[gridBottom][gridX]) != solids.end()) TileCollideBottom(gridBottom);
+		if (solids.find(mapData[gridTop][gridX]) != solids.end()) TileCollideTop(gridTop); //TopCenter
+		if (solids.find(mapData[gridBottom][gridX]) != solids.end()) TileCollideBottom(gridBottom); //BotCenter
 
 		// Apply kinetic friction if dropping down a wall
 		if(collidedLeft || collidedRight)
