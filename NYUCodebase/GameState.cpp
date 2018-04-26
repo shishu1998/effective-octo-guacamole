@@ -45,6 +45,11 @@ void GameState::updateGameState(float elapsed) {
 			Mix_PlayChannel(-1, ghost, 0);
 		}
 	}
+	int gridX, gridY;
+	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
+	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
+		player.Position = start;
+	}
 	//Translate the view matrix by the player's position
 	viewMatrix.Identity();
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
