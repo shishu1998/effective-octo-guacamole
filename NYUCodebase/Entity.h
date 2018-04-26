@@ -5,6 +5,7 @@
 #include "SheetSprite.h"
 #include "Vector4.h"
 #define Friction_X 1.0f
+#define Friction_Y 10.0f
 #define GRAVITY -0.8f
 #define AnimationConstant 0.2f
 

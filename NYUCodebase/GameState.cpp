@@ -65,6 +65,10 @@ void GameState::processKeys(const Uint8 * keys)
 			player.velocity.y = 1.0;
 			Mix_PlayChannel(-1, jump, 0);
 		}
+		if (player.collidedLeft || player.collidedRight) {
+			player.velocity.y = 0.45;
+			player.velocity.x = player.forward ? -0.8 : 0.8;
+		}
 	}
 	if (!(keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_SPACE])) {
 		player.acceleration.x = 0.0;
