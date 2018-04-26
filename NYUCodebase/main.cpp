@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 		elapsed += accumulator;
 		if (elapsed < FIXED_TIMESTEP) {
 			accumulator = elapsed;
-			continue;
+			//continue;
 		}
 		while (elapsed >= FIXED_TIMESTEP) {
 			state.updateGameState(FIXED_TIMESTEP);

@@ -5,8 +5,8 @@
 #include "SheetSprite.h"
 #include "Vector4.h"
 #define Friction_X 1.0f
-#define Friction_Y 10.0f
-#define GRAVITY -0.8f
+#define Friction_Y 40.0f
+#define GRAVITY -4.9f
 #define AnimationConstant 0.2f
 
 enum EntityType {Player, Enemy};

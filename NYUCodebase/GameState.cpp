@@ -53,21 +53,21 @@ void GameState::updateGameState(float elapsed) {
 void GameState::processKeys(const Uint8 * keys)
 {
 	if (keys[SDL_SCANCODE_A]) {
-		player.acceleration.x = -0.6;
+		player.acceleration.x = -1.2;
 		player.forward = false;
 	}
 	if (keys[SDL_SCANCODE_D]) {
-		player.acceleration.x = 0.6;
+		player.acceleration.x = 1.2;
 		player.forward = true;
 	}
 	if (keys[SDL_SCANCODE_SPACE]) {
 		if (player.collidedBottom) {
-			player.velocity.y = 1.0;
+			player.velocity.y = 2.5;
 			Mix_PlayChannel(-1, jump, 0);
 		}
 		if (player.collidedLeft || player.collidedRight) {
-			player.velocity.y = 0.45;
-			player.velocity.x = player.forward ? -0.8 : 0.8;
+			player.velocity.y = 1.25;
+			player.velocity.x = player.forward ? -1.5 : 1.5;
 		}
 	}
 	if (!(keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_SPACE])) {
