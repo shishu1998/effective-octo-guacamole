@@ -76,7 +76,7 @@ void GameState::processKeys(const Uint8 * keys)
 void GameState::PlaceEntity(std::string type, float x, float y)
 {
 	if (type == "Player") {
-		player = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize) }), Player, false);
+		player = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }), Player, false);
 	}
 	else if (type == "Enemy") {
 		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), Enemy, false);

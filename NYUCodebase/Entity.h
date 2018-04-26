@@ -25,6 +25,7 @@ public:
 	bool hasCollided() const;
 
 	void Update(float elapsed, const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int> solids);
+	void UpdateAnimation(float elapsed);
 	void Rotate(float angle);
 
 	std::vector<std::pair<float, float>> getCorners() const;

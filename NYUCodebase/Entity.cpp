@@ -138,21 +138,26 @@ void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>&
 		if (solids.find(mapData[gridTop][gridX]) != solids.end()) TileCollideTop(gridTop);
 		if (solids.find(mapData[gridBottom][gridX]) != solids.end()) TileCollideBottom(gridBottom);
 
-		// Sprite index update
-		if (fabs(velocity.x) > 0.05) {
-			animationTimer += elapsed;
-			//Animation update time should be inversely proportional to the velocity
-			if (animationTimer > AnimationConstant/fabs(velocity.x)) {
-				spriteIndex = (spriteIndex + 1) % sprites.size();
-				animationTimer = 0;
-			}
-		}
-		else {
-			// Reset sprite index if too slow/not moving
-			spriteIndex = 0;
-		}
+		UpdateAnimation(elapsed);
 	}
 	remakeMatrix();
+}
+
+// Updates the sprite index of the entity
+void Entity::UpdateAnimation(float elapsed) {
+	// Should only update when sprite is moving(slow velocity doesn't count)
+	if (fabs(velocity.x) > 0.05) {
+		animationTimer += elapsed;
+		//Animation update time should be inversely proportional to the velocity
+		if (animationTimer > AnimationConstant / fabs(velocity.x)) {
+			spriteIndex = (spriteIndex + 1) % sprites.size();
+			animationTimer = 0;
+		}
+	}
+	else {
+		// Reset sprite index if too slow/not moving
+		spriteIndex = 0;
+	}
 }
 
 void Entity::Rotate(float angle) {
