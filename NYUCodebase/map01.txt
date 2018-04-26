@@ -4,10 +4,10 @@ height=28
 tilewidth=21
 tileheight=21
 orientation=orthogonal
-background_color=141,195,218,255
+background_color=0,0,0,255
 
 [tilesets]
-tileset=../../GameProgramming/CS3113/Homework04/NYUCodebase/spritesheet_rgba.png,21,21,0,0
+tileset=spritesheet_rgba.png,21,21,0,0
 
 [layer]
 type=Tile Layer 1
