@@ -23,6 +23,7 @@ public:
 	void loadResources();
 	void initEntities();
 	void reset();
+	void resetPlayerPosition();
 	void updateGameState(float elapsed);
 	void processKeys(const Uint8 *keys);
 	void PlaceEntity(std::string type, float x, float y);

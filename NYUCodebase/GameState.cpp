@@ -23,6 +23,15 @@ void GameState::playBackgroundMusic() const{
 	Mix_PlayMusic(bgm, -1);
 }
 
+//Resets player position and movement
+void GameState::resetPlayerPosition() {
+	player.Position = start;
+	player.velocity.x = 0.0f;
+	player.velocity.y = 0.0f;
+	player.acceleration.x = 0.0f;
+	player.acceleration.y = 0.0f;
+}
+
 //Updates the GameState based on the time elapsed
 void GameState::updateGameState(float elapsed) {
 	player.Update(elapsed, map.mapData, solidTiles);
@@ -41,7 +50,7 @@ void GameState::updateGameState(float elapsed) {
 	//Player restarts when touches an enemy
 	for (int i = 0; i < entities.size(); ++i) {
 		if (player.SATCollidesWith(entities[i])) {
-			player.Position = start;
+			resetPlayerPosition();
 			Mix_PlayChannel(-1, ghost, 0);
 		}
 	}
@@ -49,7 +58,7 @@ void GameState::updateGameState(float elapsed) {
 	int gridX, gridY;
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
-		player.Position = start;
+		resetPlayerPosition();
 	}
 	//Translate the view matrix by the player's position
 	viewMatrix.Identity();
