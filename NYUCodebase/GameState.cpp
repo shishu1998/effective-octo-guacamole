@@ -9,6 +9,7 @@ void GameState::loadResources() {
 	for (int i = 0; i < map.entities.size(); i++) {
 		PlaceEntity(map.entities[i].type, map.entities[i].x * tileSize, map.entities[i].y * -tileSize);
 	}
+	solidTiles = std::unordered_set<int>(Solids);
 	start = player.Position;
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
