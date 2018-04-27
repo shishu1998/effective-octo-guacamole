@@ -99,6 +99,48 @@ void Entity::TileCollideBottom(int tileY) {
 	}
 }
 
+void Entity::tileCollision(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids, float displacementX, float displacementY)
+{
+	int gridX, gridY, gridLeft, gridRight, gridTop, gridBottom;
+	int gridQuarterLeft, gridQuarterRight, gridQuarterTop, gridQuarterBottom;
+
+	worldToTileCoordinates(Position.x, Position.y, &gridX, &gridY);
+	worldToTileCoordinates(Position.x - size.x / 2, Position.y - size.y / 2, &gridLeft, &gridBottom);
+	worldToTileCoordinates(Position.x + size.x / 2, Position.y + size.y / 2, &gridRight, &gridTop);
+	worldToTileCoordinates(Position.x - size.x / 4, Position.y - size.y / 4, &gridQuarterLeft, &gridQuarterBottom);
+	worldToTileCoordinates(Position.x + size.x / 4, Position.y + size.x / 4, &gridQuarterRight, &gridQuarterTop);
+
+	// X TileCollision 
+	Position.x += displacementX;
+	//Left side: Center, Top Quarter, Bottom Quarter
+	if ((solids.find(mapData[gridY][gridLeft]) != solids.end()) ||
+		(solids.find(mapData[gridQuarterTop][gridLeft]) != solids.end()) ||
+		(solids.find(mapData[gridQuarterBottom][gridLeft]) != solids.end())) {
+		TileCollideLeft(gridLeft);
+	}
+	//Right side: Center, Top Quarter, Bottom Quarter
+	if ((solids.find(mapData[gridY][gridRight]) != solids.end()) ||
+		(solids.find(mapData[gridQuarterTop][gridRight]) != solids.end()) ||
+		(solids.find(mapData[gridQuarterBottom][gridRight]) != solids.end())) {
+		TileCollideRight(gridRight);
+	}
+
+	// Y TileCollision
+	Position.y += displacementY;
+	//Top Side: Center, Left Quarter, Right Quarter
+	if ((solids.find(mapData[gridTop][gridX]) != solids.end()) ||
+		(solids.find(mapData[gridTop][gridQuarterLeft]) != solids.end()) ||
+		(solids.find(mapData[gridTop][gridQuarterRight]) != solids.end())) {
+		TileCollideTop(gridTop);
+	}
+	//Bottom Side: Center, Left Quarter, Right Quarter
+	if ((solids.find(mapData[gridBottom][gridX]) != solids.end()) ||
+		(solids.find(mapData[gridBottom][gridQuarterLeft]) != solids.end()) ||
+		(solids.find(mapData[gridBottom][gridQuarterRight]) != solids.end())) {
+		TileCollideBottom(gridBottom);
+	}
+}
+
 // Returns if Collision has occured
 bool Entity::hasCollided() const{
 	return collidedTop || collidedBottom || collidedLeft || collidedRight;
@@ -112,19 +154,11 @@ void Entity::remakeMatrix() {
 }
 
 //Updates the position of current entity and adjusts for collision
-void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int> solids)
+void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids)
 {
 	ResetContactFlags();
 	if (!isStatic) {
-		int gridX, gridY, gridLeft, gridRight, gridTop, gridBottom;
-		int gridQuarterLeft, gridQuarterRight, gridQuarterTop, gridQuarterBottom;
-
-		worldToTileCoordinates(Position.x, Position.y, &gridX, &gridY);
-		worldToTileCoordinates(Position.x - size.x / 2, Position.y - size.y / 2, &gridLeft, &gridBottom);
-		worldToTileCoordinates(Position.x + size.x / 2, Position.y + size.y / 2, &gridRight, &gridTop);
-		worldToTileCoordinates(Position.x - size.x / 4, Position.y - size.y / 4, &gridQuarterLeft, &gridQuarterBottom);
-		worldToTileCoordinates(Position.x + size.x / 4, Position.y + size.x / 4, &gridQuarterRight, &gridQuarterTop);
-
+	
 		velocity.x = lerp(velocity.x, 0.0f, elapsed * Friction_X);
 		velocity.x += acceleration.x * elapsed;
 		velocity.y += GRAVITY * elapsed;
@@ -132,35 +166,7 @@ void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>&
 		float displacementX = velocity.x * elapsed;
 		float displacementY = velocity.y * elapsed;
 
-		// X TileCollision 
-		Position.x += displacementX;
-		//Left side: Center, Top Quarter, Bottom Quarter
-		if ((solids.find(mapData[gridY][gridLeft]) != solids.end()) || 
-			(solids.find(mapData[gridQuarterTop][gridLeft]) != solids.end()) ||
-			(solids.find(mapData[gridQuarterBottom][gridLeft]) != solids.end())) {
-			TileCollideLeft(gridLeft);
-		}
-		//Right side: Center, Top Quarter, Bottom Quarter
-		if ((solids.find(mapData[gridY][gridRight]) != solids.end()) ||
-			(solids.find(mapData[gridQuarterTop][gridRight]) != solids.end()) ||
-			(solids.find(mapData[gridQuarterBottom][gridRight]) != solids.end())) {
-			TileCollideRight(gridRight);
-		}
-
-		// Y TileCollision
-		Position.y += displacementY;
-		//Top Side: Center, Left Quarter, Right Quarter
-		if ((solids.find(mapData[gridTop][gridX]) != solids.end()) ||
-			(solids.find(mapData[gridTop][gridQuarterLeft]) != solids.end()) ||
-			(solids.find(mapData[gridTop][gridQuarterRight]) != solids.end())) {
-			TileCollideTop(gridTop);
-		}
-		//Bottom Side: Center, Left Quarter, Right Quarter
-		if ((solids.find(mapData[gridBottom][gridX]) != solids.end()) ||
-			(solids.find(mapData[gridBottom][gridQuarterLeft]) != solids.end()) ||
-			(solids.find(mapData[gridBottom][gridQuarterRight]) != solids.end())) {
-			TileCollideBottom(gridBottom);
-		}
+		tileCollision(mapData, solids, displacementX, displacementY);
 
 		// Apply kinetic friction if dropping down a wall
 		if(collidedLeft || collidedRight)
