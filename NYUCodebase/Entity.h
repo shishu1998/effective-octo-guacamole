@@ -23,9 +23,10 @@ public:
 	void TileCollideRight(int tileX);
 	void TileCollideTop(int tileY);
 	void TileCollideBottom(int tileY);
+	void tileCollision(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids, float displacementX, float displacementY);
 	bool hasCollided() const;
 
-	void Update(float elapsed, const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int> solids);
+	void Update(float elapsed, const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids);
 	void UpdateAnimation(float elapsed);
 	void Rotate(float angle);
 

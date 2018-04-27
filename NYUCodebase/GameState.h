@@ -12,7 +12,7 @@ public:
 	int TextureID;
 	FlareMap map;
 	std::vector<Entity> entities;
-	std::unordered_set<int> solidTiles = std::unordered_set<int>(Solids);
+	std::unordered_set<int> solidTiles;
 	Entity player;
 	Vector4 start;
 	Matrix viewMatrix;
