@@ -87,7 +87,7 @@ void GameState::processKeys(const Uint8 * keys)
 			canJump = false;
 		}
 		if (player.collidedLeft || player.collidedRight) {
-			player.velocity.y = 2.0;
+			player.velocity.y = 1.8;
 			player.velocity.x = player.forward ? -1.5 : 1.5;
 			canJump = false;
 		}
