@@ -38,13 +38,17 @@ void GameState::updateGameState(float elapsed) {
 	player.Update(elapsed, map.mapData, solidTiles);
 	for (int i = 0; i < entities.size(); ++i) {
 		entities[i].Update(elapsed, map.mapData, solidTiles);
-		//Reverses the movement of NPCs if there is collision against tiles
-		if (entities[i].collidedLeft) {
-			entities[i].acceleration.x = 0.0;
+		//Enemy jumps if possible 
+		if ((entities[i].canJumpLeft(map.mapData, solidTiles) || entities[i].canJumpRight(map.mapData, solidTiles)) && entities[i].collidedBottom) {
+			entities[i].velocity.y = 2.5;
+		}
+		//Reverses the movement of NPCs if there is collision against tiles or if they can't drop down
+		if (entities[i].collidedLeft || !entities[i].canDropDownLeft(map.mapData, solidTiles)) {
+			entities[i].acceleration.x = 0.5;
 			entities[i].forward = false;
 		}
-		if (entities[i].collidedRight) {
-			entities[i].acceleration.x = -0.0;
+		if (entities[i].collidedRight || !entities[i].canDropDownRight(map.mapData, solidTiles)) {
+			entities[i].acceleration.x = -0.5;
 			entities[i].forward = true;
 		}
 	}
@@ -100,7 +104,7 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 	}
 	else if (type == "Enemy") {
 		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), Enemy, false);
-		enemy.acceleration.x = 0.0;
+		enemy.acceleration.x = 0.5;
 		entities.emplace_back(enemy);
 	}
 }
