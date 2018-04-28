@@ -26,6 +26,10 @@ public:
 	// FIXUP: Use Event Polling instead of a variable in the gamestate
 	bool canJump = true;
 
+	bool playerHasKey = false;
+	//stores the key's x,y tile coord after picked up
+	int keyX, keyY;
+
 	Vector4 start;
 	Matrix viewMatrix;
 
@@ -40,6 +44,7 @@ public:
 	void initEntities();
 	void reset();
 	void resetPlayerPosition();
+	void pickUpKey(int gridY, int gridX);
 	void updateGameState(float elapsed);
 	void processKeys(const Uint8 *keys);
 	void PlaceEntity(std::string type, float x, float y);
