@@ -39,6 +39,7 @@ public:
 	Mix_Chunk *keyPickUp;
 	Mix_Chunk *doorLock;
 	Mix_Chunk *doorOpen;
+	Mix_Chunk *splash;
 
 	~GameState();
 	void loadResources();

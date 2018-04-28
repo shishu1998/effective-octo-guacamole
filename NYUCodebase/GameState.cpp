@@ -22,6 +22,7 @@ void GameState::loadResources() {
 	keyPickUp = Mix_LoadWAV("coin.wav");
 	doorLock = Mix_LoadWAV("doorLock.wav");
 	doorOpen = Mix_LoadWAV("doorOpen.wav");
+	splash = Mix_LoadWAV("splash.wav");
 }
 
 FlareMap & GameState::chooseMap()
@@ -136,6 +137,7 @@ void GameState::updateLevel(float elapsed)
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
 		resetPlayerPosition();
+		Mix_PlayChannel(-1, splash, 0);
 	}
 	//Player picks up key on collision
 	if (map.mapData[gridY][gridX] == 14) {
@@ -237,5 +239,6 @@ GameState::~GameState() {
 	Mix_FreeChunk(keyPickUp);
 	Mix_FreeChunk(doorLock);
 	Mix_FreeChunk(doorOpen);
+	Mix_FreeChunk(splash);
 	Mix_CloseAudio();
 }
