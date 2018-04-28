@@ -4,25 +4,39 @@
 #include <vector>
 #include <SDL.h>
 #include <SDL_mixer.h>
-#define levelFILE "map01.txt"
+#define level1FILE "map01.txt"
+#define level2FILE "map02.txt"
+#define level3FILE "map03.txt"
 #define Solids {121, 122, 123, 124, 125, 130, 152, 155}
+enum GameMode { Menu, Instruction, Quit, Level1, Level2, Level3, Victory, Defeat };
 
 class GameState {
 public:
 	int TextureID;
-	FlareMap map;
+	FlareMap map1;
+	FlareMap map2;
+	FlareMap map3;
+	// TODO: set the default to be Menu once we have a menu
+	GameMode mode = Level1;
+
 	std::vector<Entity> entities;
 	std::unordered_set<int> solidTiles;
 	Entity player;
+
 	// FIXUP: Use Event Polling instead of a variable in the gamestate
 	bool canJump = true;
+
 	Vector4 start;
 	Matrix viewMatrix;
+
 	Mix_Chunk *ghost;
 	Mix_Chunk *jump;
 	Mix_Music *bgm;
+
 	~GameState();
 	void loadResources();
+	FlareMap& chooseMap();
+	void goToNextLevel();
 	void initEntities();
 	void reset();
 	void resetPlayerPosition();
