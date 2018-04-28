@@ -73,16 +73,20 @@ void GameState::resetPlayerPosition() {
 	player.acceleration.x = 0.0f;
 	player.acceleration.y = 0.0f;
 	FlareMap& map = chooseMap();
-	map.mapData[keyY][keyX] = 14;
-	playerHasKey = false;
+	if (playerHasKey) {
+		map.mapData[keyY][keyX] = 14;
+		playerHasKey = false;
+	}
 }
 
 //Player picks up key
 void GameState::pickUpKey(int gridY, int gridX) {
 	playerHasKey = true;
+	//save key's original coord
 	keyX = gridX;
 	keyY = gridY;
 	FlareMap& map = chooseMap();
+	//no more key at that location
 	map.mapData[gridY][gridX] = 0;
 }
 
@@ -119,7 +123,7 @@ void GameState::updateGameState(float elapsed) {
 	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
 		resetPlayerPosition();
 	}
-	//Player picks up key
+	//Player picks up key on collision
 	if (map.mapData[gridY][gridX] == 14) {
 		pickUpKey(gridY, gridX);
 	}
@@ -143,8 +147,8 @@ void GameState::processKeys(const Uint8 * keys)
 		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 		FlareMap map = chooseMap();
 		if (playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) ) {
-			goToNextLevel();
 			playerHasKey = false;
+			goToNextLevel();
 		}
 	}
 	if (keys[SDL_SCANCODE_SPACE] && canJump) {

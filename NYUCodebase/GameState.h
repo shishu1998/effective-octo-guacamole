@@ -27,6 +27,7 @@ public:
 	bool canJump = true;
 
 	bool playerHasKey = false;
+	//stores the key's x,y tile coord after picked up
 	int keyX, keyY;
 
 	Vector4 start;
