@@ -14,6 +14,8 @@ public:
 	std::vector<Entity> entities;
 	std::unordered_set<int> solidTiles;
 	Entity player;
+	// FIXUP: Use Event Polling instead of a variable in the gamestate
+	bool canJump = true;
 	Vector4 start;
 	Matrix viewMatrix;
 	Mix_Chunk *ghost;
