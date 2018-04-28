@@ -5,10 +5,13 @@
 //Loads the required resources for the entities
 void GameState::loadResources() {
 	TextureID = LoadTexture(RESOURCE_FOLDER"spritesheet_rgba.png");
-	map.Load(levelFILE);
-	for (int i = 0; i < map.entities.size(); i++) {
-		PlaceEntity(map.entities[i].type, map.entities[i].x * tileSize, map.entities[i].y * -tileSize);
+	map1.Load(level1FILE);
+	// TODO: Move this into goToNextLevel once we have a menu
+	for (int i = 0; i < map1.entities.size(); i++) {
+		PlaceEntity(map1.entities[i].type, map1.entities[i].x * tileSize, map1.entities[i].y * -tileSize);
 	}
+	map2.Load(level2FILE);
+	map3.Load(level3FILE);
 	solidTiles = std::unordered_set<int>(Solids);
 	start = player.Position;
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
@@ -16,6 +19,44 @@ void GameState::loadResources() {
 	bgm = Mix_LoadMUS("Running.mp3");
 	ghost = Mix_LoadWAV("ghost.wav");
 	jump = Mix_LoadWAV("boing_spring.wav");
+}
+
+FlareMap & GameState::chooseMap()
+{
+	switch (mode) {
+		case Level1:
+			return map1;
+		case Level2:
+			return map2;
+		case Level3:
+			return map3;
+	}
+}
+
+void GameState::goToNextLevel()
+{
+	switch (mode) {
+		case Menu:
+			mode = Level1;
+			break;
+		case Level1:
+			mode = Level2;
+			entities.clear();
+			for (int i = 0; i < map2.entities.size(); i++) {
+				PlaceEntity(map2.entities[i].type, map2.entities[i].x * tileSize, map2.entities[i].y * -tileSize);
+			}
+			break;
+		case Level2:
+			mode = Level3;
+			entities.clear();
+			for (int i = 0; i < map3.entities.size(); i++) {
+				PlaceEntity(map3.entities[i].type, map3.entities[i].x * tileSize, map3.entities[i].y * -tileSize);
+			}
+			break;
+		case Level3:
+			mode = Victory;
+			break;
+	}
 }
 
 //Plays the background music
@@ -35,6 +76,7 @@ void GameState::resetPlayerPosition() {
 
 //Updates the GameState based on the time elapsed
 void GameState::updateGameState(float elapsed) {
+	FlareMap& map = chooseMap();
 	player.Update(elapsed, map.mapData, solidTiles);
 	for (int i = 0; i < entities.size(); ++i) {
 		entities[i].Update(elapsed, map.mapData, solidTiles);
@@ -80,6 +122,14 @@ void GameState::processKeys(const Uint8 * keys)
 		player.acceleration.x = 1.2;
 		player.forward = true;
 	}
+	if (keys[SDL_SCANCODE_W]) {
+		int gridX, gridY;
+		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
+		FlareMap map = chooseMap();
+		if (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168 ) {
+			goToNextLevel();
+		}
+	}
 	if (keys[SDL_SCANCODE_SPACE] && canJump) {
 		if (player.collidedBottom) {
 			player.velocity.y = 2.5;
@@ -107,7 +157,7 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 	}
 	else if (type == "Enemy") {
 		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), Enemy, false);
-		enemy.acceleration.x = 0.5;
+		enemy.acceleration.x = -0.5;
 		entities.emplace_back(enemy);
 	}
 }
@@ -115,7 +165,7 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 //Draws the game state (tilemap and entities)
 void GameState::Render(ShaderProgram & program)
 {
-	DrawLevel(program, TextureID, map, viewMatrix, 0.0, 0.0);
+	DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0);
 	player.Render(program, viewMatrix);
 	for (int i = 0; i < entities.size(); ++i) {
 		entities[i].Render(program, viewMatrix);
