@@ -19,6 +19,10 @@ void GameState::loadResources() {
 	bgm = Mix_LoadMUS("Running.mp3");
 	ghost = Mix_LoadWAV("ghost.wav");
 	jump = Mix_LoadWAV("boing_spring.wav");
+	keyPickUp = Mix_LoadWAV("coin.wav");
+	doorLock = Mix_LoadWAV("doorLock.wav");
+	doorOpen = Mix_LoadWAV("doorOpen.wav");
+	splash = Mix_LoadWAV("splash.wav");
 }
 
 FlareMap & GameState::chooseMap()
@@ -33,8 +37,7 @@ FlareMap & GameState::chooseMap()
 	}
 }
 
-void GameState::goToNextLevel()
-{
+void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
 			mode = Level1;
@@ -82,6 +85,7 @@ void GameState::resetPlayerPosition() {
 //Player picks up key
 void GameState::pickUpKey(int gridY, int gridX) {
 	playerHasKey = true;
+	Mix_PlayChannel(-1, keyPickUp, 0);
 	//save key's original coord
 	keyX = gridX;
 	keyY = gridY;
@@ -133,6 +137,7 @@ void GameState::updateLevel(float elapsed)
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
 		resetPlayerPosition();
+		Mix_PlayChannel(-1, splash, 0);
 	}
 	//Player picks up key on collision
 	if (map.mapData[gridY][gridX] == 14) {
@@ -169,9 +174,13 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 		int gridX, gridY;
 		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 		FlareMap map = chooseMap();
-		if (playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168)) {
+		if (playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) ) {
+			Mix_PlayChannel(-1, doorOpen, 0);
 			playerHasKey = false;
 			goToNextLevel();
+		}
+		else if (!playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168)) {
+			Mix_PlayChannel(-1, doorLock, 0);
 		}
 	}
 	if (keys[SDL_SCANCODE_SPACE] && canJump) {
@@ -227,5 +236,9 @@ GameState::~GameState() {
 	Mix_FreeChunk(ghost);
 	Mix_FreeChunk(jump);
 	Mix_FreeMusic(bgm);
+	Mix_FreeChunk(keyPickUp);
+	Mix_FreeChunk(doorLock);
+	Mix_FreeChunk(doorOpen);
+	Mix_FreeChunk(splash);
 	Mix_CloseAudio();
 }
