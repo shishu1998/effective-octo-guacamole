@@ -44,12 +44,12 @@ public:
 	void loadResources();
 	FlareMap& chooseMap();
 	void goToNextLevel();
-	void initEntities();
-	void reset();
 	void resetPlayerPosition();
 	void pickUpKey(int gridY, int gridX);
 	void updateGameState(float elapsed);
+	void updateLevel(float elapsed);
 	void processKeys(const Uint8 *keys);
+	void processKeysInLevel(const Uint8 *keys);
 	void PlaceEntity(std::string type, float x, float y);
 	void Render(ShaderProgram &program);
 	void GameState::playBackgroundMusic() const;
