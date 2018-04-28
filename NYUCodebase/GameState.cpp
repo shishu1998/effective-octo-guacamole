@@ -80,20 +80,23 @@ void GameState::processKeys(const Uint8 * keys)
 		player.acceleration.x = 1.2;
 		player.forward = true;
 	}
-	if (keys[SDL_SCANCODE_SPACE]) {
+	if (keys[SDL_SCANCODE_SPACE] && canJump) {
 		if (player.collidedBottom) {
 			player.velocity.y = 2.5;
 			Mix_PlayChannel(-1, jump, 0);
+			canJump = false;
 		}
 		if (player.collidedLeft || player.collidedRight) {
-			player.velocity.y = 1.25;
+			player.velocity.y = 1.8;
 			player.velocity.x = player.forward ? -1.5 : 1.5;
+			canJump = false;
 		}
 	}
-	if (!(keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_SPACE])) {
+	if (!(keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_D])) {
 		player.acceleration.x = 0.0;
 		player.acceleration.y = 0.0;
 	}
+	if (!keys[SDL_SCANCODE_SPACE]) canJump = true;
 }
 
 //Creates entities based on the string type
