@@ -150,9 +150,12 @@ void GameState::processKeys(const Uint8 * keys)
 		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 		FlareMap map = chooseMap();
 		if (playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) ) {
-			Mix_PlayChannel(-1, doorLock, 0);
+			Mix_PlayChannel(-1, doorOpen, 0);
 			playerHasKey = false;
 			goToNextLevel();
+		}
+		else if (!playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168)) {
+			Mix_PlayChannel(-1, doorLock, 0);
 		}
 	}
 	if (keys[SDL_SCANCODE_SPACE] && canJump) {
