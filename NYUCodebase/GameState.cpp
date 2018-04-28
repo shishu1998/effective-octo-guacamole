@@ -92,6 +92,17 @@ void GameState::pickUpKey(int gridY, int gridX) {
 
 //Updates the GameState based on the time elapsed
 void GameState::updateGameState(float elapsed) {
+	switch (mode) {
+	case Level1:
+	case Level2:
+	case Level3:
+		updateLevel(elapsed);
+		break;
+	}
+}
+
+void GameState::updateLevel(float elapsed)
+{
 	FlareMap& map = chooseMap();
 	player.Update(elapsed, map.mapData, solidTiles);
 	for (int i = 0; i < entities.size(); ++i) {
@@ -134,6 +145,18 @@ void GameState::updateGameState(float elapsed) {
 
 void GameState::processKeys(const Uint8 * keys)
 {
+	switch (mode) {
+		case Level1:
+		case Level2:
+		case Level3:
+			processKeysInLevel(keys);
+			break;
+	}
+}
+
+//Process the key input while in a level
+void GameState::processKeysInLevel(const Uint8 * keys)
+{
 	if (keys[SDL_SCANCODE_A]) {
 		player.acceleration.x = -1.2;
 		player.forward = false;
@@ -146,7 +169,7 @@ void GameState::processKeys(const Uint8 * keys)
 		int gridX, gridY;
 		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 		FlareMap map = chooseMap();
-		if (playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) ) {
+		if (playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168)) {
 			playerHasKey = false;
 			goToNextLevel();
 		}
@@ -186,11 +209,17 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 //Draws the game state (tilemap and entities)
 void GameState::Render(ShaderProgram & program)
 {
-	DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0);
-	player.Render(program, viewMatrix);
-	for (int i = 0; i < entities.size(); ++i) {
-		entities[i].Render(program, viewMatrix);
-	}
+	switch (mode) {
+		case Level1:
+		case Level2:
+		case Level3:
+			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0);
+			player.Render(program, viewMatrix);
+			for (int i = 0; i < entities.size(); ++i) {
+				entities[i].Render(program, viewMatrix);
+			}
+			break;
+		}
 }
 
 // Destructor for GameState
