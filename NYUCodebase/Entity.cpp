@@ -31,6 +31,7 @@ void Entity::UntexturedDraw(ShaderProgram & Program) {
 
 void Entity::Render(ShaderProgram & Program, Matrix viewMatrix)
 {
+	remakeMatrix();
 	Matrix modelMatrix = matrix;
 	if (!forward) modelMatrix.Scale(-1.0, 1.0, 0);
 
@@ -173,7 +174,6 @@ void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>&
 			velocity.y = lerp(velocity.y, 0.0f, elapsed * Friction_Y);
 		UpdateAnimation(elapsed);
 	}
-	remakeMatrix();
 }
 
 // Updates the sprite index of the entity
