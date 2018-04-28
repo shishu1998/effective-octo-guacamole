@@ -72,6 +72,18 @@ void GameState::resetPlayerPosition() {
 	player.velocity.y = 0.0f;
 	player.acceleration.x = 0.0f;
 	player.acceleration.y = 0.0f;
+	FlareMap& map = chooseMap();
+	map.mapData[keyY][keyX] = 14;
+	playerHasKey = false;
+}
+
+//Player picks up key
+void GameState::pickUpKey(int gridY, int gridX) {
+	playerHasKey = true;
+	keyX = gridX;
+	keyY = gridY;
+	FlareMap& map = chooseMap();
+	map.mapData[gridY][gridX] = 0;
 }
 
 //Updates the GameState based on the time elapsed
@@ -107,6 +119,10 @@ void GameState::updateGameState(float elapsed) {
 	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
 		resetPlayerPosition();
 	}
+	//Player picks up key
+	if (map.mapData[gridY][gridX] == 14) {
+		pickUpKey(gridY, gridX);
+	}
 	//Translate the view matrix by the player's position
 	viewMatrix.Identity();
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
@@ -126,8 +142,9 @@ void GameState::processKeys(const Uint8 * keys)
 		int gridX, gridY;
 		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 		FlareMap map = chooseMap();
-		if (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168 ) {
+		if (playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) ) {
 			goToNextLevel();
+			playerHasKey = false;
 		}
 	}
 	if (keys[SDL_SCANCODE_SPACE] && canJump) {
