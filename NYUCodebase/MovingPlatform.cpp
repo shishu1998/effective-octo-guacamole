@@ -68,7 +68,11 @@ bool MovingPlatform::CollidesWith(Entity & other)
 		float firstBlockLeft = blocks.front().Position.x - blocks.front().size.x / 2;
 		float lastBlockRight = blocks.back().Position.x + blocks.back().size.x / 2;
 		if (entityBot > blocks[0].Position.y && (entityQuarterRight > firstBlockLeft || entityQuarterLeft < lastBlockRight)) {
-			other.velocity.y = 0;
+			other.collidedBottom = true;
+			//Prevents the entity from dropping down the platform
+			if (other.velocity.y < 0) {
+				other.velocity.y = 0;
+			}
 		}
 	}
 	return collidesWith;
