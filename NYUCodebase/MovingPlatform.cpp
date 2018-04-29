@@ -62,9 +62,16 @@ bool MovingPlatform::CollidesWith(Entity & other)
 		bool currentBlockCollided = other.SATCollidesWith(blocks[i], penetration);
 		collidesWith = collidesWith || currentBlockCollided;
 		//Prevents entity from falling through the platform and allowing jumping
-		if (currentBlockCollided && penetration.second > 0 && other.velocity.y < 0) {
-			other.velocity.y = 0;
-			other.collidedBottom = true;
+		if (currentBlockCollided) {
+			if (penetration.second > 0 && other.velocity.y < 0) {
+				other.velocity.y = 0;
+				other.collidedBottom = true;
+			}
+			if (penetration.second < 0) {
+				other.acceleration.y = 0;
+				other.velocity.y = 0;
+				other.collidedTop = true;
+			}
 			//If one tile collides and they're all aligned horizontally, there's no point to continue checking
 			break;
 		}
