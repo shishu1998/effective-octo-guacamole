@@ -29,6 +29,8 @@ void MovingPlatform::Update(float elapsed, const std::vector<std::vector<unsigne
 				blocks[j].Position.y += adjustment.y;
 			}
 		}
+		entity.Position.x += adjustment.x;
+		entity.Position.y += adjustment.y;
 		if (adjustment.x > 0) {
 			acceleration.x = 0.3;
 			velocity.x = 0;
