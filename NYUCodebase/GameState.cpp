@@ -223,8 +223,9 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 		entities.emplace_back(enemy);
 	}
 	else if (type == "Moving") {
-		platforms.emplace_back(TextureID, x, y, 3);
-		platforms[0].acceleration.x = -0.2;
+		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
+		plat.acceleration.x = -0.3;
+		platforms.emplace_back(plat);
 	}
 }
 
