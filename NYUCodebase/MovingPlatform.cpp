@@ -63,6 +63,7 @@ bool MovingPlatform::CollidesWith(Entity & other)
 		collidesWith = collidesWith || currentBlockCollided;
 		//Prevents entity from falling through the platform and allowing jumping
 		if (currentBlockCollided) {
+			/* Possibly include Walljump on platforms if time allows */
 			if (penetration.second > 0 && other.velocity.y < 0) {
 				other.velocity.y = 0;
 				other.collidedBottom = true;
