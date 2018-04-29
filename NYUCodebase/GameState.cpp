@@ -45,6 +45,7 @@ void GameState::goToNextLevel() {
 		case Level1:
 			mode = Level2;
 			entities.clear();
+			platforms.clear();
 			for (int i = 0; i < map2.entities.size(); i++) {
 				PlaceEntity(map2.entities[i].type, map2.entities[i].x * tileSize, map2.entities[i].y * -tileSize);
 			}
@@ -52,6 +53,7 @@ void GameState::goToNextLevel() {
 		case Level2:
 			mode = Level3;
 			entities.clear();
+			platforms.clear();
 			for (int i = 0; i < map3.entities.size(); i++) {
 				PlaceEntity(map3.entities[i].type, map3.entities[i].x * tileSize, map3.entities[i].y * -tileSize);
 			}
@@ -125,6 +127,12 @@ void GameState::updateLevel(float elapsed)
 			entities[i].forward = true;
 		}
 	}
+
+	//Platform update, also resolves platform player collision + movement
+	for (int i = 0; i < platforms.size(); ++i) {
+		platforms[i].Update(elapsed, map.mapData, solidTiles, player);
+	}
+
 	//Player restarts when touches an enemy
 	for (int i = 0; i < entities.size(); ++i) {
 		if (player.SATCollidesWith(entities[i])) {
@@ -132,6 +140,7 @@ void GameState::updateLevel(float elapsed)
 			Mix_PlayChannel(-1, ghost, 0);
 		}
 	}
+
 	//Player restarts when touches water
 	int gridX, gridY;
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
@@ -213,6 +222,11 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 		enemy.acceleration.x = -0.5;
 		entities.emplace_back(enemy);
 	}
+	else if (type == "Moving") {
+		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
+		plat.acceleration.x = -0.3;
+		platforms.emplace_back(plat);
+	}
 }
 
 //Draws the game state (tilemap and entities)
@@ -226,6 +240,9 @@ void GameState::Render(ShaderProgram & program)
 			player.Render(program, viewMatrix);
 			for (int i = 0; i < entities.size(); ++i) {
 				entities[i].Render(program, viewMatrix);
+			}
+			for (int i = 0; i < platforms.size(); ++i) {
+				platforms[i].Render(program, viewMatrix);
 			}
 			break;
 		}

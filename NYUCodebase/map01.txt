@@ -53,8 +53,8 @@ location=31,15,1,1
 
 [ObjectsLayer]
 # block1
-type=ROTATING
-location=20,8,1,1
+type=Moving
+location=18,8,1,1
 
 [ObjectsLayer]
 # block5
