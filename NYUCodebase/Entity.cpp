@@ -213,8 +213,7 @@ std::vector<std::pair<float, float>> Entity::getCorners() const {
 }
 
 //SAT Collision code
-bool Entity::SATCollidesWith(Entity& Other) {
-	std::pair<float, float> penetration;
+bool Entity::SATCollidesWith(Entity& Other, std::pair<float, float>& penetration) {
 	bool collided = CheckSATCollision(getCorners(), Other.getCorners(), penetration);
 	if (Other.isStatic) {
 		Position.x += penetration.first;

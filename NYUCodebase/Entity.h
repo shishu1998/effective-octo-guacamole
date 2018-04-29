@@ -32,7 +32,7 @@ public:
 
 	std::vector<std::pair<float, float>> getCorners() const;
 	void remakeMatrix();
-	bool SATCollidesWith(Entity& Other);
+	bool SATCollidesWith(Entity& Other, std::pair<float, float>& penetration);
 
 	bool canDropDownLeft(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
 	bool canDropDownRight(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;

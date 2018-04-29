@@ -57,25 +57,18 @@ void MovingPlatform::Update(float elapsed, const std::vector<std::vector<unsigne
 bool MovingPlatform::CollidesWith(Entity & other)
 {
 	bool collidesWith = false;
+	std::pair<float, float> penetration;
 	for (int i = 0; i < blocks.size(); ++i) {
-		collidesWith = collidesWith || other.SATCollidesWith(blocks[i]);
-	}
-
-	//If the entity is on top of the platform, set y velocity to 0
-	if (collidesWith) {
-		float entityBot = other.Position.y - other.size.y / 2;
-		//Tile Collision checks quarter segments, we're pretending the platforms are like tiles
-		float entityQuarterRight = other.Position.x + tileSize/4;
-		float entityQuarterLeft = other.Position.x - tileSize / 4;
-		float firstBlockLeft = blocks.front().Position.x - blocks.front().size.x / 2;
-		float lastBlockRight = blocks.back().Position.x + blocks.back().size.x / 2;
-		if (entityBot > blocks[0].Position.y && (entityQuarterRight > firstBlockLeft || entityQuarterLeft < lastBlockRight)) {
+		bool currentBlockCollided = other.SATCollidesWith(blocks[i], penetration);
+		collidesWith = collidesWith || currentBlockCollided;
+		//Prevents entity from falling through the platform and allowing jumping
+		if (currentBlockCollided && penetration.second > 0 && other.velocity.y < 0) {
+			other.velocity.y = 0;
 			other.collidedBottom = true;
-			//Prevents the entity from dropping down the platform
-			if (other.velocity.y < 0) {
-				other.velocity.y = 0;
-			}
+			//If one tile collides and they're all aligned horizontally, there's no point to continue checking
+			break;
 		}
 	}
+
 	return collidesWith;
 }

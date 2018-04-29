@@ -129,6 +129,7 @@ void GameState::updateGameState(float elapsed) {
 
 void GameState::updateLevel(float elapsed)
 {
+	std::pair<float, float> penetration;
 	FlareMap& map = chooseMap();
 	player.Update(elapsed, map.mapData, solidTiles);
 	for (int i = 0; i < entities.size(); ++i) {
@@ -155,7 +156,7 @@ void GameState::updateLevel(float elapsed)
 
 	//Player restarts when touches an enemy
 	for (int i = 0; i < entities.size(); ++i) {
-		if (player.SATCollidesWith(entities[i])) {
+		if (player.SATCollidesWith(entities[i], penetration)) {
 			resetPlayerPosition();
 			Mix_PlayChannel(-1, ghost, 0);
 		}
