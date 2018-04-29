@@ -38,6 +38,7 @@ FlareMap & GameState::chooseMap()
 	}
 }
 
+//Scans and sets the coordinates of the door on the map
 void GameState::setExitCoordinates(const FlareMap& map) {
 	for (int i = 0; i < map.mapData.size(); ++i) {
 		for (int j = 0; j < map.mapData[i].size(); ++j) {
