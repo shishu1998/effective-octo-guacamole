@@ -10,6 +10,7 @@ void GameState::loadResources() {
 	for (int i = 0; i < map1.entities.size(); i++) {
 		PlaceEntity(map1.entities[i].type, map1.entities[i].x * tileSize, map1.entities[i].y * -tileSize);
 	}
+	setExitCoordinates(map1);
 	map2.Load(level2FILE);
 	map3.Load(level3FILE);
 	solidTiles = std::unordered_set<int>(Solids);
@@ -37,6 +38,18 @@ FlareMap & GameState::chooseMap()
 	}
 }
 
+//Scans and sets the coordinates of the door on the map
+void GameState::setExitCoordinates(const FlareMap& map) {
+	for (int i = 0; i < map.mapData.size(); ++i) {
+		for (int j = 0; j < map.mapData[i].size(); ++j) {
+			if (map.mapData[i][j] == 167) {
+				doorX = j;
+				doorY = i;
+			}
+		}
+	}
+}
+
 void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
@@ -49,6 +62,7 @@ void GameState::goToNextLevel() {
 			for (int i = 0; i < map2.entities.size(); i++) {
 				PlaceEntity(map2.entities[i].type, map2.entities[i].x * tileSize, map2.entities[i].y * -tileSize);
 			}
+			setExitCoordinates(map2);
 			break;
 		case Level2:
 			mode = Level3;
@@ -57,6 +71,7 @@ void GameState::goToNextLevel() {
 			for (int i = 0; i < map3.entities.size(); i++) {
 				PlaceEntity(map3.entities[i].type, map3.entities[i].x * tileSize, map3.entities[i].y * -tileSize);
 			}
+			setExitCoordinates(map3);
 			break;
 		case Level3:
 			mode = Victory;
@@ -81,6 +96,8 @@ void GameState::resetPlayerPosition() {
 	if (playerHasKey) {
 		map.mapData[keyY][keyX] = 14;
 		playerHasKey = false;
+		map.mapData[doorY][doorX] = 167;
+		map.mapData[doorY-1][doorX] = 166;
 	}
 }
 
@@ -94,6 +111,9 @@ void GameState::pickUpKey(int gridY, int gridX) {
 	FlareMap& map = chooseMap();
 	//no more key at that location
 	map.mapData[gridY][gridX] = 0;
+	//set door to "unlocked"
+	map.mapData[doorY][doorX] = 137;
+	map.mapData[doorY-1][doorX] = 136;
 }
 
 //Updates the GameState based on the time elapsed
@@ -183,12 +203,12 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 		int gridX, gridY;
 		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 		FlareMap map = chooseMap();
-		if (playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) ) {
+		if (map.mapData[gridY][gridX] == 137 || map.mapData[gridY][gridX] == 138) {
 			Mix_PlayChannel(-1, doorOpen, 0);
 			playerHasKey = false;
 			goToNextLevel();
 		}
-		else if (!playerHasKey && (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168)) {
+		else if (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) {
 			Mix_PlayChannel(-1, doorLock, 0);
 		}
 	}

@@ -52,59 +52,48 @@ bool Entity::CollidesWith(const Entity& Other)
 	return !(Position.y - size.y / 2 > Other.Position.y + Other.size.y / 2 || Position.y + size.y / 2 < Other.Position.y - Other.size.y / 2 || Position.x - size.x / 2 > Other.Position.x + Other.size.x / 2 || Position.x + size.x / 2 < Other.Position.x - Other.size.x / 2);
 }
 
-//Checks if the center of the left side is colliding with the tile to the left, returns the adjustment amount
+//Left Tile Collision adjustment, returns the adjustment amount
 float Entity::TileCollideLeft(int tileX) {
 	float worldX = tileX * tileSize;
-	float leftPen = 0;
-	if (Position.x - size.x / 2 < worldX + tileSize) {
-		collidedLeft = true;
-		acceleration.x = 0;
-		velocity.x = 0;
-		leftPen = (worldX + tileSize) - (Position.x - size.x / 2) + 0.01*tileSize;
-		Position.x += leftPen;
-	}
+	collidedLeft = true;
+	acceleration.x = 0;
+	velocity.x = 0;
+	float leftPen = fabs((worldX + tileSize) - (Position.x - size.x / 2)) + 0.0001*tileSize;
+	Position.x += leftPen;
 	return leftPen;
 }
 
-//Checks if the center of the right side is colliding with the tile to the right, returns the adjustment amount
+//Right Tile Collision adjustment, returns the adjustment amount
 float Entity::TileCollideRight(int tileX) {
 	float worldX = tileX * tileSize;
-	float rightPen = 0;
-	if (Position.x + size.x / 2 > worldX) {
-		collidedRight = true;
-		acceleration.x = 0;
-		velocity.x = 0;
-		rightPen = (Position.x + size.x / 2 - worldX + 0.01*tileSize);
-		Position.x -= rightPen;
-	}
+	float worldX = tileX * tileSize;
+	collidedRight = true;
+	acceleration.x = 0;
+	velocity.x = 0;
+	float rightPen = fabs(Position.x + size.x / 2 - worldX) + 0.0001*tileSize;
+	Position.x -= rightPen;
 	return -rightPen;
 }
 
-//Checks if the center of the top side is colliding with the tile to the top, returns the adjustment amount
+//Top Tile Collision adjustment, returns the adjustment amount
 float Entity::TileCollideTop(int tileY) {
 	float worldY = tileY * -tileSize;
-	float topPen = 0;
-	if (Position.y + size.y / 2 > worldY - tileSize) {
-		collidedTop = true;
-		acceleration.y = 0;
-		velocity.y = 0;
-		topPen = ((Position.y + size.y / 2) - (worldY - tileSize) + tileSize * 0.01);
-		Position.y -= topPen;
-	}
+	collidedTop = true;
+	acceleration.y = 0;
+	velocity.y = 0;
+	float topPen = fabs((Position.y + size.y / 2) - (worldY - tileSize)) + tileSize * 0.0001;
+	Position.y -= topPen;
 	return -topPen;
 }
 
-//Checks if the center of the bottom side is colliding with the tile to the bottom, returns the adjustment amount
+//Bottom Tile Collision adjustment, returns the adjustment amount
 float Entity::TileCollideBottom(int tileY) {
 	float worldY = tileY * -tileSize;
-	float botPen = 0;
-	if (Position.y - size.y / 2 < worldY) {
-		collidedBottom = true;
-		acceleration.y = 0;
-		velocity.y = 0;
-		botPen = (worldY - (Position.y - size.y / 2)) + tileSize * 0.01;
-		Position.y += botPen;
-	}
+	collidedBottom = true;
+	acceleration.y = 0;
+	velocity.y = 0;
+	float botPen = fabs(worldY - (Position.y - (size.y / 2))) + tileSize * 0.0001;
+	Position.y += botPen;
 	return botPen;
 }
 
