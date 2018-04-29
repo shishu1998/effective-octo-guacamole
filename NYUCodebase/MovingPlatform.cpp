@@ -74,8 +74,6 @@ bool MovingPlatform::CollidesWith(Entity & other)
 				other.velocity.y = 0;
 				other.collidedTop = true;
 			}
-			//If one tile collides and they're all aligned horizontally, there's no point to continue checking
-			break;
 		}
 	}
 
