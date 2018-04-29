@@ -23,12 +23,14 @@ public:
 	std::unordered_set<int> solidTiles;
 	Entity player;
 
-	// FIXUP: Use Event Polling instead of a variable in the gamestate
+	// Emulates keydown event, keys is faster than polling
 	bool canJump = true;
 
 	bool playerHasKey = false;
 	//stores the key's x,y tile coord after picked up
 	int keyX, keyY;
+	//stores the coordinates of the exit
+	int doorX, doorY;
 
 	Vector4 start;
 	Matrix viewMatrix;
@@ -44,6 +46,7 @@ public:
 	~GameState();
 	void loadResources();
 	FlareMap& chooseMap();
+	void GameState::setExitCoordinates(const FlareMap& map);
 	void goToNextLevel();
 	void resetPlayerPosition();
 	void pickUpKey(int gridY, int gridX);
