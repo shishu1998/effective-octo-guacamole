@@ -61,13 +61,14 @@ bool MovingPlatform::CollidesWith(Entity & other)
 	for (int i = 0; i < blocks.size(); ++i) {
 		bool currentBlockCollided = other.SATCollidesWith(blocks[i], penetration);
 		collidesWith = collidesWith || currentBlockCollided;
-		//Prevents entity from falling through the platform and allowing jumping
 		if (currentBlockCollided) {
 			/* Possibly include Walljump on platforms if time allows */
+			//Prevents entity from falling through the platform and allowing jumping
 			if (penetration.second > 0 && other.velocity.y < 0) {
 				other.velocity.y = 0;
 				other.collidedBottom = true;
 			}
+			//Checks if entity is jumping against the platform
 			if (penetration.second < 0) {
 				other.acceleration.y = 0;
 				other.velocity.y = 0;
