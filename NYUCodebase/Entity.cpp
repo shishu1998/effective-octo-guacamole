@@ -66,7 +66,6 @@ float Entity::TileCollideLeft(int tileX) {
 //Right Tile Collision adjustment, returns the adjustment amount
 float Entity::TileCollideRight(int tileX) {
 	float worldX = tileX * tileSize;
-	float worldX = tileX * tileSize;
 	collidedRight = true;
 	acceleration.x = 0;
 	velocity.x = 0;
