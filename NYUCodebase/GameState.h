@@ -4,10 +4,11 @@
 #include <vector>
 #include <SDL.h>
 #include <SDL_mixer.h>
-#define level1FILE "map01.txt"
+//#define level1FILE "map01.txt"
+#define level1FILE "mapA.txt"
 #define level2FILE "map02.txt"
 #define level3FILE "map03.txt"
-#define Solids {121, 122, 123, 124, 125, 130, 152, 155}
+#define Solids {121, 122, 123, 124, 125, 130, 152, 155, 162}
 enum GameMode { Menu, Instruction, Quit, Level1, Level2, Level3, Victory, Defeat };
 
 class GameState {
