@@ -9,7 +9,7 @@
 #define GRAVITY -4.9f
 #define AnimationConstant 0.2f
 
-enum EntityType {Player, Enemy};
+enum EntityType {Player, Enemy, MovingBlock};
 class Entity {
 public:
 	Entity();
@@ -19,11 +19,11 @@ public:
 	void Render(ShaderProgram &Program, Matrix viewMatrix);
 	void ResetContactFlags();
 	bool CollidesWith(const Entity& Other);
-	void TileCollideLeft(int tileX);
-	void TileCollideRight(int tileX);
-	void TileCollideTop(int tileY);
-	void TileCollideBottom(int tileY);
-	void tileCollision(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids, float displacementX, float displacementY);
+	float TileCollideLeft(int tileX);
+	float TileCollideRight(int tileX);
+	float TileCollideTop(int tileY);
+	float TileCollideBottom(int tileY);
+	Vector4 tileCollision(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids, float displacementX, float displacementY);
 	bool hasCollided() const;
 
 	void Update(float elapsed, const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids);
@@ -32,7 +32,7 @@ public:
 
 	std::vector<std::pair<float, float>> getCorners() const;
 	void remakeMatrix();
-	bool SATCollidesWith(Entity& Other);
+	bool SATCollidesWith(Entity& Other, std::pair<float, float>& penetration);
 
 	bool canDropDownLeft(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
 	bool canDropDownRight(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
