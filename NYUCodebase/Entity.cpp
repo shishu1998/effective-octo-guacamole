@@ -161,7 +161,7 @@ void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>&
 
 		tileCollision(mapData, solids, displacementX, displacementY);
 
-		// Apply kinetic friction if dropping down a wall
+		// Apply static friction if dropping down a wall
 		if(collidedLeft || collidedRight)
 			velocity.y = lerp(velocity.y, 0.0f, elapsed * Friction_Y);
 		UpdateAnimation(elapsed);
