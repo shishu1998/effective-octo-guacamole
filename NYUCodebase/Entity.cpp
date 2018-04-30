@@ -283,3 +283,11 @@ bool Entity::canJumpRight(const std::vector<std::vector<unsigned int>>& mapData,
 
 	return false;
 }
+
+//Resets the position, velocity, and acceleration of the entity
+void Entity::reset()
+{
+	Position = originalPosition;
+	velocity = originalVelocity;
+	acceleration = originalAcceleration;
+}

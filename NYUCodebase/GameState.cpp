@@ -14,7 +14,6 @@ void GameState::loadResources() {
 	map2.Load(level2FILE);
 	map3.Load(level3FILE);
 	solidTiles = std::unordered_set<int>(Solids);
-	start = player.Position;
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	bgm = Mix_LoadMUS("Running.mp3");
@@ -83,14 +82,14 @@ void GameState::playBackgroundMusic() const{
 	Mix_PlayMusic(bgm, -1);
 }
 
-//Resets player position and movement
-void GameState::resetPlayerPosition() {
-	player.Position = start;
-	player.velocity.x = 0.0f;
-	player.velocity.y = 0.0f;
-	player.acceleration.x = 0.0f;
-	player.acceleration.y = 0.0f;
+//Resets players and entities upon death
+void GameState::playerDeath() {
+	player.reset();
+	for (int i = 0; i < entities.size(); ++i) {
+		entities[i].reset();
+	}
 	FlareMap& map = chooseMap();
+	//put the key back and lock the door if the player already has a key
 	if (playerHasKey) {
 		map.mapData[keyY][keyX] = 14;
 		playerHasKey = false;
@@ -148,7 +147,7 @@ void GameState::updateLevel(float elapsed)
 	//Player restarts when touches an enemy
 	for (int i = 0; i < entities.size(); ++i) {
 		if (player.SATCollidesWith(entities[i])) {
-			resetPlayerPosition();
+			playerDeath();
 			Mix_PlayChannel(-1, ghost, 0);
 		}
 	}
@@ -156,7 +155,7 @@ void GameState::updateLevel(float elapsed)
 	int gridX, gridY;
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
-		resetPlayerPosition();
+		playerDeath();
 		Mix_PlayChannel(-1, splash, 0);
 	}
 	//Player picks up key on collision
@@ -222,15 +221,31 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 	if (!keys[SDL_SCANCODE_SPACE]) canJump = true;
 }
 
+//Checks if an entity fell out of the map
+bool GameState::checkEntityOutOfBounds(const Entity & other)
+{
+	FlareMap map = chooseMap();
+	int gridTop, gridBottom, gridLeft, gridRight;
+	worldToTileCoordinates(other.Position.x - other.size.x / 2, other.Position.y - other.size.y / 2, &gridLeft, &gridBottom);
+	worldToTileCoordinates(other.Position.x + other.size.x / 2, other.Position.y + other.size.y / 2, &gridRight, &gridTop);
+	return (gridLeft < 0) || (gridRight >= map.mapData[0].size()) || (gridBottom >= map.mapData.size()) || (gridTop < 0);
+}
+
 //Creates entities based on the string type
 void GameState::PlaceEntity(std::string type, float x, float y)
 {
 	if (type == "Player") {
 		player = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }), Player, false);
+		player.originalPosition = player.Position;
+		player.originalVelocity = player.velocity;
+		player.originalAcceleration = player.acceleration;
 	}
 	else if (type == "Enemy") {
 		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), Enemy, false);
 		enemy.acceleration.x = -0.5;
+		enemy.originalPosition = enemy.Position;
+		enemy.originalVelocity = enemy.velocity;
+		enemy.originalAcceleration = enemy.acceleration;
 		entities.emplace_back(enemy);
 	}
 }

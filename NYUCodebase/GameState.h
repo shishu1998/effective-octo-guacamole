@@ -33,7 +33,6 @@ public:
 	//stores the coordinates of the exit
 	int doorX, doorY;
 
-	Vector4 start;
 	Matrix viewMatrix;
 
 	Mix_Chunk *ghost;
@@ -49,12 +48,13 @@ public:
 	FlareMap& chooseMap();
 	void GameState::setExitCoordinates(const FlareMap& map);
 	void goToNextLevel();
-	void resetPlayerPosition();
+	void playerDeath();
 	void pickUpKey(int gridY, int gridX);
 	void updateGameState(float elapsed);
 	void updateLevel(float elapsed);
 	void processKeys(const Uint8 *keys);
 	void processKeysInLevel(const Uint8 *keys);
+	bool checkEntityOutOfBounds(const Entity& other);
 	void PlaceEntity(std::string type, float x, float y);
 	void Render(ShaderProgram &program);
 	void GameState::playBackgroundMusic() const;
