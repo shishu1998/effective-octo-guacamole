@@ -52,47 +52,52 @@ bool Entity::CollidesWith(const Entity& Other)
 	return !(Position.y - size.y / 2 > Other.Position.y + Other.size.y / 2 || Position.y + size.y / 2 < Other.Position.y - Other.size.y / 2 || Position.x - size.x / 2 > Other.Position.x + Other.size.x / 2 || Position.x + size.x / 2 < Other.Position.x - Other.size.x / 2);
 }
 
-//Left Tile Collision adjustment
-void Entity::TileCollideLeft(int tileX) {
+//Left Tile Collision adjustment, returns the adjustment amount
+float Entity::TileCollideLeft(int tileX) {
 	float worldX = tileX * tileSize;
 	collidedLeft = true;
 	acceleration.x = 0;
 	velocity.x = 0;
 	float leftPen = fabs((worldX + tileSize) - (Position.x - size.x / 2)) + 0.0001*tileSize;
 	Position.x += leftPen;
+	return leftPen;
 }
 
-//Right Tile Collision adjustment
-void Entity::TileCollideRight(int tileX) {
+//Right Tile Collision adjustment, returns the adjustment amount
+float Entity::TileCollideRight(int tileX) {
 	float worldX = tileX * tileSize;
 	collidedRight = true;
 	acceleration.x = 0;
 	velocity.x = 0;
 	float rightPen = fabs(Position.x + size.x / 2 - worldX) + 0.0001*tileSize;
 	Position.x -= rightPen;
+	return -rightPen;
 }
 
-//Top Tile Collision adjustment
-void Entity::TileCollideTop(int tileY) {
+//Top Tile Collision adjustment, returns the adjustment amount
+float Entity::TileCollideTop(int tileY) {
 	float worldY = tileY * -tileSize;
 	collidedTop = true;
 	acceleration.y = 0;
 	velocity.y = 0;
 	float topPen = fabs((Position.y + size.y / 2) - (worldY - tileSize)) + tileSize * 0.0001;
 	Position.y -= topPen;
+	return -topPen;
 }
 
-//Bottom Tile Collision adjustment
-void Entity::TileCollideBottom(int tileY) {
+//Bottom Tile Collision adjustment, returns the adjustment amount
+float Entity::TileCollideBottom(int tileY) {
 	float worldY = tileY * -tileSize;
 	collidedBottom = true;
 	acceleration.y = 0;
 	velocity.y = 0;
 	float botPen = fabs(worldY - (Position.y - (size.y / 2))) + tileSize * 0.0001;
 	Position.y += botPen;
+	return botPen;
 }
 
-void Entity::tileCollision(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids, float displacementX, float displacementY)
+//Resolves tile collisions on all sides, returns a vector of all the adjustments made to resolve the collisions
+Vector4 Entity::tileCollision(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids, float displacementX, float displacementY)
 {
 	int gridX, gridY, gridLeft, gridRight, gridTop, gridBottom;
 	int gridQuarterLeft, gridQuarterRight, gridQuarterTop, gridQuarterBottom;
@@ -103,19 +108,21 @@ void Entity::tileCollision(const std::vector<std::vector<unsigned int>>& mapData
 	worldToTileCoordinates(Position.x - size.x / 4, Position.y - size.y / 4, &gridQuarterLeft, &gridQuarterBottom);
 	worldToTileCoordinates(Position.x + size.x / 4, Position.y + size.x / 4, &gridQuarterRight, &gridQuarterTop);
 
+	Vector4 adjustment;
+
 	// X TileCollision 
 	Position.x += displacementX;
 	//Left side: Center, Top Quarter, Bottom Quarter
 	if ((solids.find(mapData[gridY][gridLeft]) != solids.end()) ||
 		(solids.find(mapData[gridQuarterTop][gridLeft]) != solids.end()) ||
 		(solids.find(mapData[gridQuarterBottom][gridLeft]) != solids.end())) {
-		TileCollideLeft(gridLeft);
+		adjustment.x += TileCollideLeft(gridLeft);
 	}
 	//Right side: Center, Top Quarter, Bottom Quarter
 	if ((solids.find(mapData[gridY][gridRight]) != solids.end()) ||
 		(solids.find(mapData[gridQuarterTop][gridRight]) != solids.end()) ||
 		(solids.find(mapData[gridQuarterBottom][gridRight]) != solids.end())) {
-		TileCollideRight(gridRight);
+		adjustment.x += TileCollideRight(gridRight);
 	}
 
 	// Y TileCollision
@@ -124,14 +131,16 @@ void Entity::tileCollision(const std::vector<std::vector<unsigned int>>& mapData
 	if ((solids.find(mapData[gridTop][gridX]) != solids.end()) ||
 		(solids.find(mapData[gridTop][gridQuarterLeft]) != solids.end()) ||
 		(solids.find(mapData[gridTop][gridQuarterRight]) != solids.end())) {
-		TileCollideTop(gridTop);
+		adjustment.y += TileCollideTop(gridTop);
 	}
 	//Bottom Side: Center, Left Quarter, Right Quarter
 	if ((solids.find(mapData[gridBottom][gridX]) != solids.end()) ||
 		(solids.find(mapData[gridBottom][gridQuarterLeft]) != solids.end()) ||
 		(solids.find(mapData[gridBottom][gridQuarterRight]) != solids.end())) {
-		TileCollideBottom(gridBottom);
+		adjustment.y += TileCollideBottom(gridBottom);
 	}
+
+	return adjustment;
 }
 
 // Returns if Collision has occured
@@ -204,16 +213,11 @@ std::vector<std::pair<float, float>> Entity::getCorners() const {
 }
 
 //SAT Collision code
-bool Entity::SATCollidesWith(Entity& Other) {
-	std::pair<float, float> penetration;
+bool Entity::SATCollidesWith(Entity& Other, std::pair<float, float>& penetration) {
 	bool collided = CheckSATCollision(getCorners(), Other.getCorners(), penetration);
-	if (Other.isStatic) {
-		Position.x += penetration.first;
-		Position.y += penetration.second;
-	}
-	else {
-		Position.x += (penetration.first * 0.5f);
-		Position.y += (penetration.second * 0.5f);
+	Position.x += (penetration.first * 0.5f);
+	Position.y += (penetration.second * 0.5f);
+	if (!Other.isStatic) {
 		Other.Position.x -= (penetration.first * 0.5f);
 		Other.Position.y -= (penetration.second * 0.5f);
 	}

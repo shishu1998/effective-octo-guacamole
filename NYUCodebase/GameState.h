@@ -1,5 +1,5 @@
 #pragma once
-#include "Entity.h"
+#include "MovingPlatform.h"
 #include "FlareMap.h"
 #include <vector>
 #include <SDL.h>
@@ -21,6 +21,7 @@ public:
 	GameMode mode = Level1;
 
 	std::vector<Entity> entities;
+	std::vector<MovingPlatform> platforms;
 	std::unordered_set<int> solidTiles;
 	Entity player;
 
