@@ -170,7 +170,7 @@ void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>&
 
 		tileCollision(mapData, solids, displacementX, displacementY);
 
-		// Apply kinetic friction if dropping down a wall
+		// Apply static friction if dropping down a wall
 		if(collidedLeft || collidedRight)
 			velocity.y = lerp(velocity.y, 0.0f, elapsed * Friction_Y);
 		UpdateAnimation(elapsed);
@@ -215,11 +215,13 @@ std::vector<std::pair<float, float>> Entity::getCorners() const {
 //SAT Collision code
 bool Entity::SATCollidesWith(Entity& Other, std::pair<float, float>& penetration) {
 	bool collided = CheckSATCollision(getCorners(), Other.getCorners(), penetration);
-	Position.x += (penetration.first * 0.5f);
-	Position.y += (penetration.second * 0.5f);
-	if (!Other.isStatic) {
-		Other.Position.x -= (penetration.first * 0.5f);
-		Other.Position.y -= (penetration.second * 0.5f);
+	if (collided) {
+		Position.x += (penetration.first * 0.5f);
+		Position.y += (penetration.second * 0.5f);
+		if (!Other.isStatic) {
+			Other.Position.x -= (penetration.first * 0.5f);
+			Other.Position.y -= (penetration.second * 0.5f);
+		}
 	}
 	return collided;
 }
@@ -286,4 +288,12 @@ bool Entity::canJumpRight(const std::vector<std::vector<unsigned int>>& mapData,
 	}
 
 	return false;
+}
+
+//Resets the position, velocity, and acceleration of the entity
+void Entity::reset()
+{
+	Position = originalPosition;
+	velocity = originalVelocity;
+	acceleration = originalAcceleration;
 }

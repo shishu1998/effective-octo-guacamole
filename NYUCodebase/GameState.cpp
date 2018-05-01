@@ -14,7 +14,6 @@ void GameState::loadResources() {
 	map2.Load(level2FILE);
 	map3.Load(level3FILE);
 	solidTiles = std::unordered_set<int>(Solids);
-	start = player.Position;
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	bgm = Mix_LoadMUS("Running.mp3");
@@ -57,7 +56,8 @@ void GameState::goToNextLevel() {
 			break;
 		case Level1:
 			mode = Level2;
-			entities.clear();
+			enemies.clear();
+			boxes.clear();
 			platforms.clear();
 			for (int i = 0; i < map2.entities.size(); i++) {
 				PlaceEntity(map2.entities[i].type, map2.entities[i].x * tileSize, map2.entities[i].y * -tileSize);
@@ -66,7 +66,8 @@ void GameState::goToNextLevel() {
 			break;
 		case Level2:
 			mode = Level3;
-			entities.clear();
+			enemies.clear();
+			boxes.clear();
 			platforms.clear();
 			for (int i = 0; i < map3.entities.size(); i++) {
 				PlaceEntity(map3.entities[i].type, map3.entities[i].x * tileSize, map3.entities[i].y * -tileSize);
@@ -85,14 +86,18 @@ void GameState::playBackgroundMusic() const{
 	Mix_PlayMusic(bgm, -1);
 }
 
-//Resets player position and movement
-void GameState::resetPlayerPosition() {
-	player.Position = start;
-	player.velocity.x = 0.0f;
-	player.velocity.y = 0.0f;
-	player.acceleration.x = 0.0f;
-	player.acceleration.y = 0.0f;
+//Resets players and entities upon death
+void GameState::playerDeath() {
+	player.reset();
+	for (int i = 0; i < enemies.size(); ++i) {
+		enemies[i].reset();
+		enemies[i].forward = true;
+	}
+	for (int i = 0; i < boxes.size(); ++i) {
+		boxes[i].reset();
+	}
 	FlareMap& map = chooseMap();
+	//put the key back and lock the door if the player already has a key
 	if (playerHasKey) {
 		map.mapData[keyY][keyX] = 14;
 		playerHasKey = false;
@@ -132,21 +137,41 @@ void GameState::updateLevel(float elapsed)
 	std::pair<float, float> penetration;
 	FlareMap& map = chooseMap();
 	player.Update(elapsed, map.mapData, solidTiles);
-	for (int i = 0; i < entities.size(); ++i) {
-		entities[i].Update(elapsed, map.mapData, solidTiles);
+	for (int i = 0; i < enemies.size(); ++i) {
+		enemies[i].Update(elapsed, map.mapData, solidTiles);
 		//Enemy jumps if possible 
-		if ((entities[i].canJumpLeft(map.mapData, solidTiles) || entities[i].canJumpRight(map.mapData, solidTiles)) && entities[i].collidedBottom) {
-			entities[i].velocity.y = 2.5;
+		if ((enemies[i].canJumpLeft(map.mapData, solidTiles) || enemies[i].canJumpRight(map.mapData, solidTiles)) && enemies[i].collidedBottom) {
+			enemies[i].velocity.y = 2.5;
 		}
 		//Reverses the movement of NPCs if there is collision against tiles or if they can't drop down
-		if (entities[i].collidedLeft || !entities[i].canDropDownLeft(map.mapData, solidTiles)) {
-			entities[i].acceleration.x = 0.5;
-			entities[i].forward = false;
+		if (enemies[i].collidedLeft || !enemies[i].canDropDownLeft(map.mapData, solidTiles)) {
+			enemies[i].acceleration.x = 0.5;
+			enemies[i].forward = false;
 		}
-		if (entities[i].collidedRight || !entities[i].canDropDownRight(map.mapData, solidTiles)) {
-			entities[i].acceleration.x = -0.5;
-			entities[i].forward = true;
+		if (enemies[i].collidedRight || !enemies[i].canDropDownRight(map.mapData, solidTiles)) {
+			enemies[i].acceleration.x = -0.5;
+			enemies[i].forward = true;
 		}
+		//Enemies respawn if goes out of bounds
+		if (checkEntityOutOfBounds(enemies[i])) enemies[i].reset();
+	}
+
+	//Boxes falling(possibly) update
+	for (int i = 0; i < boxes.size(); ++i) {
+		boxes[i].Update(elapsed, map.mapData, solidTiles);
+
+		//Player Collision with Box
+		player.SATCollidesWith(boxes[i], penetration);
+		if (penetration.second > 0 && player.velocity.y < 0){
+			player.velocity.y = 0;
+			player.collidedBottom = true;
+		}
+		else if (penetration.second < 0) {
+			player.velocity.y = 0;
+			player.collidedTop = true;
+		}
+		//Boxes respawn if fallen out of bounds
+		if (checkEntityOutOfBounds(boxes[i])) boxes[i].reset();
 	}
 
 	//Platform update, also resolves platform player collision + movement
@@ -155,9 +180,9 @@ void GameState::updateLevel(float elapsed)
 	}
 
 	//Player restarts when touches an enemy
-	for (int i = 0; i < entities.size(); ++i) {
-		if (player.SATCollidesWith(entities[i], penetration)) {
-			resetPlayerPosition();
+	for (int i = 0; i < enemies.size(); ++i) {
+		if (player.SATCollidesWith(enemies[i], penetration)) {
+			playerDeath();
 			Mix_PlayChannel(-1, ghost, 0);
 		}
 	}
@@ -166,7 +191,7 @@ void GameState::updateLevel(float elapsed)
 	int gridX, gridY;
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
 	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
-		resetPlayerPosition();
+		playerDeath();
 		Mix_PlayChannel(-1, splash, 0);
 	}
 	//Player picks up key on collision
@@ -232,26 +257,43 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 	if (!keys[SDL_SCANCODE_SPACE]) canJump = true;
 }
 
+//Checks if an entity fell out of the map
+bool GameState::checkEntityOutOfBounds(const Entity & other)
+{
+	FlareMap map = chooseMap();
+	int gridTop, gridBottom, gridLeft, gridRight;
+	worldToTileCoordinates(other.Position.x - other.size.x / 2, other.Position.y - other.size.y / 2, &gridLeft, &gridBottom);
+	worldToTileCoordinates(other.Position.x + other.size.x / 2, other.Position.y + other.size.y / 2, &gridRight, &gridTop);
+	return (gridLeft < 0) || (gridRight >= map.mapData[0].size()) || (gridBottom >= map.mapData.size()) || (gridTop < 0);
+}
+
 //Creates entities based on the string type
 void GameState::PlaceEntity(std::string type, float x, float y)
 {
 	if (type == "Player") {
 		player = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }), Player, false);
+		player.originalPosition = player.Position;
+		player.originalVelocity = player.velocity;
+		player.originalAcceleration = player.acceleration;
 	}
 	else if (type == "Enemy") {
 		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), Enemy, false);
 		enemy.acceleration.x = -0.5;
-		entities.emplace_back(enemy);
+		enemy.originalPosition = enemy.Position;
+		enemy.originalVelocity = enemy.velocity;
+		enemy.originalAcceleration = enemy.acceleration;
+		enemy.forward = true;
+		enemies.emplace_back(enemy);
 	}
-	else if (type == "MovingX") {
+	else if (type == "Moving") {
 		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
 		plat.acceleration.x = 0.3;
 		platforms.emplace_back(plat);
 	}
-	else if (type == "MovingY") {
-		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
-		plat.acceleration.y = 0.3;
-		platforms.emplace_back(plat);
+	else if (type == "Box") {
+		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 191, tileSize) }), Box, false);
+		box.originalPosition = box.Position;
+		boxes.emplace_back(box);
 	}
 }
 
@@ -264,8 +306,11 @@ void GameState::Render(ShaderProgram & program)
 		case Level3:
 			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0);
 			player.Render(program, viewMatrix);
-			for (int i = 0; i < entities.size(); ++i) {
-				entities[i].Render(program, viewMatrix);
+			for (int i = 0; i < enemies.size(); ++i) {
+				enemies[i].Render(program, viewMatrix);
+			}
+			for (int i = 0; i < boxes.size(); ++i) {
+				boxes[i].Render(program, viewMatrix);
 			}
 			for (int i = 0; i < platforms.size(); ++i) {
 				platforms[i].Render(program, viewMatrix);
