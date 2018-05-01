@@ -60,7 +60,6 @@ void GameState::goToNextLevel() {
 			enemies.clear();
 			boxes.clear();
 			platforms.clear();
-			//player.reset(); //???? orig player pos change
 			glClearColor(0.455f, 0.0f, 0.416f, 1.0f);
 			for (int i = 0; i < map2.entities.size(); i++) {
 				PlaceEntity(map2.entities[i].type, map2.entities[i].x * tileSize, map2.entities[i].y * -tileSize);
