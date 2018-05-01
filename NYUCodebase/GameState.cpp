@@ -5,6 +5,7 @@
 //Loads the required resources for the entities
 void GameState::loadResources() {
 	TextureID = LoadTexture(RESOURCE_FOLDER"spritesheet_rgba.png");
+	fontTextureID = LoadTexture(RESOURCE_FOLDER"font1.png");
 	map1.Load(level1FILE);
 	// TODO: Move this into goToNextLevel once we have a menu
 	for (int i = 0; i < map1.entities.size(); i++) {
@@ -108,6 +109,12 @@ void GameState::playerDeath() {
 		playerHasKey = false;
 		map.mapData[doorY][doorX] = 167;
 		map.mapData[doorY-1][doorX] = 166;
+	}
+	lives -= 1;
+	//player has no lives left; game over
+	if (!lives) {
+		mode = Defeat;
+		//goToNextLevel();
 	}
 }
 
@@ -329,6 +336,15 @@ void GameState::Render(ShaderProgram & program)
 			for (int i = 0; i < platforms.size(); ++i) {
 				platforms[i].Render(program, viewMatrix);
 			}
+			break;
+		case Victory:
+			viewMatrix.Identity();
+			glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
+			break;
+		case Defeat:
+			viewMatrix.Identity();
+			glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
+			DrawMessage(program, fontTextureID, "git gud", -0.5f, 0.0f, 0.3f, -0.15f);
 			break;
 		}
 }

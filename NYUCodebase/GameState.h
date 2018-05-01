@@ -15,6 +15,7 @@ enum GameMode { Menu, Instruction, Quit, Level1, Level2, Level3, Victory, Defeat
 class GameState {
 public:
 	int TextureID;
+	int fontTextureID;
 	FlareMap map1;
 	FlareMap map2;
 	FlareMap map3;
@@ -36,6 +37,7 @@ public:
 	int keyX, keyY;
 	//stores the coordinates of the exit
 	int doorX, doorY;
+	int lives = 1;
 
 	Matrix viewMatrix;
 
