@@ -14,6 +14,7 @@ void GameState::loadResources() {
 	map2.Load(level2FILE);
 	map3.Load(level3FILE);
 	solidTiles = std::unordered_set<int>(Solids);
+	fluidTiles = std::unordered_set<int>(Fluids);
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	bgm = Mix_LoadMUS("Running.mp3");
@@ -59,6 +60,7 @@ void GameState::goToNextLevel() {
 			enemies.clear();
 			boxes.clear();
 			platforms.clear();
+			glClearColor(0.455f, 0.0f, 0.416f, 1.0f);
 			for (int i = 0; i < map2.entities.size(); i++) {
 				PlaceEntity(map2.entities[i].type, map2.entities[i].x * tileSize, map2.entities[i].y * -tileSize);
 			}
@@ -190,10 +192,10 @@ void GameState::updateLevel(float elapsed)
 		}
 	}
 
-	//Player restarts when touches water
+	//Player restarts when touches water/lava
 	int gridX, gridY;
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
-	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
+	if (fluidTiles.find(map.mapData[gridY][gridX]) != fluidTiles.end()) {
 		playerDeath();
 		Mix_PlayChannel(-1, splash, 0);
 	}
