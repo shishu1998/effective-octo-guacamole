@@ -98,6 +98,9 @@ void GameState::playerDeath() {
 	for (int i = 0; i < boxes.size(); ++i) {
 		boxes[i].reset();
 	}
+	for (int i = 0; i < platforms.size(); ++i) {
+		platforms[i].reset();
+	}
 	FlareMap& map = chooseMap();
 	//put the key back and lock the door if the player already has a key
 	if (playerHasKey) {
@@ -139,6 +142,8 @@ void GameState::updateLevel(float elapsed)
 	std::pair<float, float> penetration;
 	FlareMap& map = chooseMap();
 	player.Update(elapsed, map.mapData, solidTiles);
+	//This shouldn't ever happen, but just in case
+	if (checkEntityOutOfBounds(player)) player.reset();
 	for (int i = 0; i < enemies.size(); ++i) {
 		enemies[i].Update(elapsed, map.mapData, solidTiles);
 		//Enemy jumps if possible 
@@ -287,9 +292,16 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 		enemy.forward = true;
 		enemies.emplace_back(enemy);
 	}
-	else if (type == "Moving") {
+	else if (type == "MovingX") {
 		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
 		plat.acceleration.x = 0.3;
+		plat.originalAcceleration = plat.acceleration;
+		platforms.emplace_back(plat);
+	}
+	else if (type == "MovingY") {
+		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
+		plat.acceleration.y = 0.3;
+		plat.originalAcceleration = plat.acceleration;
 		platforms.emplace_back(plat);
 	}
 	else if (type == "Box") {

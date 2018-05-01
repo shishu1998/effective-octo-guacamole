@@ -53,7 +53,7 @@ location=31,15,1,1
 
 [ObjectsLayer]
 # block1
-type=Moving
+type=MovingX
 location=18,8,1,1
 
 [ObjectsLayer]
@@ -85,4 +85,9 @@ location=68,20,1,0
 # block7
 type=Box
 location=74,19,0,0
+
+[ObjectsLayer]
+# block8
+type=MovingY
+location=69,14,0,0
 
