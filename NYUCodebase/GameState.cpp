@@ -142,6 +142,8 @@ void GameState::updateLevel(float elapsed)
 	std::pair<float, float> penetration;
 	FlareMap& map = chooseMap();
 	player.Update(elapsed, map.mapData, solidTiles);
+	//This shouldn't ever happen, but just in case
+	if (checkEntityOutOfBounds(player)) player.reset();
 	for (int i = 0; i < enemies.size(); ++i) {
 		enemies[i].Update(elapsed, map.mapData, solidTiles);
 		//Enemy jumps if possible 
