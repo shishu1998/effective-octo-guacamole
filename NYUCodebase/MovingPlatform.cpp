@@ -3,7 +3,9 @@
 MovingPlatform::MovingPlatform(int TextureID, float x, float y, int numBlocks)
 {
 	for (int i = 0; i < numBlocks; ++i) {
-		blocks.emplace_back(Entity(x + tileSize*i, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 124, tileSize) }), MovingBlock, true));
+		Entity block = Entity(x + tileSize * i, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 124, tileSize) }), MovingBlock, true);
+		block.originalPosition = block.Position;
+		blocks.emplace_back(block);
 	}
 }
 
@@ -68,4 +70,12 @@ bool MovingPlatform::CollidesWith(Entity & other)
 	}
 
 	return collidesWith;
+}
+
+void MovingPlatform::reset() {
+	for (int i = 0; i < blocks.size(); ++i) {
+		blocks[i].reset();
+		acceleration = originalAcceleration;
+		velocity = originalVelocity;
+	}
 }
