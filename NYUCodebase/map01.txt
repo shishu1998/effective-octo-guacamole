@@ -53,7 +53,7 @@ location=31,15,1,1
 
 [ObjectsLayer]
 # block1
-type=MovingX
+type=Moving
 location=18,8,1,1
 
 [ObjectsLayer]

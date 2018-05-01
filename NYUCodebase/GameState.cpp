@@ -56,7 +56,8 @@ void GameState::goToNextLevel() {
 			break;
 		case Level1:
 			mode = Level2;
-			entities.clear();
+			enemies.clear();
+			boxes.clear();
 			platforms.clear();
 			for (int i = 0; i < map2.entities.size(); i++) {
 				PlaceEntity(map2.entities[i].type, map2.entities[i].x * tileSize, map2.entities[i].y * -tileSize);
@@ -65,7 +66,8 @@ void GameState::goToNextLevel() {
 			break;
 		case Level2:
 			mode = Level3;
-			entities.clear();
+			enemies.clear();
+			boxes.clear();
 			platforms.clear();
 			for (int i = 0; i < map3.entities.size(); i++) {
 				PlaceEntity(map3.entities[i].type, map3.entities[i].x * tileSize, map3.entities[i].y * -tileSize);
@@ -87,8 +89,9 @@ void GameState::playBackgroundMusic() const{
 //Resets players and entities upon death
 void GameState::playerDeath() {
 	player.reset();
-	for (int i = 0; i < entities.size(); ++i) {
-		entities[i].reset();
+	for (int i = 0; i < enemies.size(); ++i) {
+		enemies[i].reset();
+		enemies[i].forward = true;
 	}
 	FlareMap& map = chooseMap();
 	//put the key back and lock the door if the player already has a key
@@ -131,20 +134,20 @@ void GameState::updateLevel(float elapsed)
 	std::pair<float, float> penetration;
 	FlareMap& map = chooseMap();
 	player.Update(elapsed, map.mapData, solidTiles);
-	for (int i = 0; i < entities.size(); ++i) {
-		entities[i].Update(elapsed, map.mapData, solidTiles);
+	for (int i = 0; i < enemies.size(); ++i) {
+		enemies[i].Update(elapsed, map.mapData, solidTiles);
 		//Enemy jumps if possible 
-		if ((entities[i].canJumpLeft(map.mapData, solidTiles) || entities[i].canJumpRight(map.mapData, solidTiles)) && entities[i].collidedBottom) {
-			entities[i].velocity.y = 2.5;
+		if ((enemies[i].canJumpLeft(map.mapData, solidTiles) || enemies[i].canJumpRight(map.mapData, solidTiles)) && enemies[i].collidedBottom) {
+			enemies[i].velocity.y = 2.5;
 		}
 		//Reverses the movement of NPCs if there is collision against tiles or if they can't drop down
-		if (entities[i].collidedLeft || !entities[i].canDropDownLeft(map.mapData, solidTiles)) {
-			entities[i].acceleration.x = 0.5;
-			entities[i].forward = false;
+		if (enemies[i].collidedLeft || !enemies[i].canDropDownLeft(map.mapData, solidTiles)) {
+			enemies[i].acceleration.x = 0.5;
+			enemies[i].forward = false;
 		}
-		if (entities[i].collidedRight || !entities[i].canDropDownRight(map.mapData, solidTiles)) {
-			entities[i].acceleration.x = -0.5;
-			entities[i].forward = true;
+		if (enemies[i].collidedRight || !enemies[i].canDropDownRight(map.mapData, solidTiles)) {
+			enemies[i].acceleration.x = -0.5;
+			enemies[i].forward = true;
 		}
 	}
 
@@ -154,8 +157,8 @@ void GameState::updateLevel(float elapsed)
 	}
 
 	//Player restarts when touches an enemy
-	for (int i = 0; i < entities.size(); ++i) {
-		if (player.SATCollidesWith(entities[i], penetration)) {
+	for (int i = 0; i < enemies.size(); ++i) {
+		if (player.SATCollidesWith(enemies[i], penetration)) {
 			playerDeath();
 			Mix_PlayChannel(-1, ghost, 0);
 		}
@@ -256,17 +259,16 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 		enemy.originalPosition = enemy.Position;
 		enemy.originalVelocity = enemy.velocity;
 		enemy.originalAcceleration = enemy.acceleration;
-		entities.emplace_back(enemy);
+		enemy.forward = true;
+		enemies.emplace_back(enemy);
 	}
-	else if (type == "MovingX") {
+	else if (type == "Moving") {
 		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
 		plat.acceleration.x = 0.3;
 		platforms.emplace_back(plat);
 	}
-	else if (type == "MovingY") {
-		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
-		plat.acceleration.y = 0.3;
-		platforms.emplace_back(plat);
+	else if (type == "Box") {
+
 	}
 }
 
@@ -279,8 +281,8 @@ void GameState::Render(ShaderProgram & program)
 		case Level3:
 			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0);
 			player.Render(program, viewMatrix);
-			for (int i = 0; i < entities.size(); ++i) {
-				entities[i].Render(program, viewMatrix);
+			for (int i = 0; i < enemies.size(); ++i) {
+				enemies[i].Render(program, viewMatrix);
 			}
 			for (int i = 0; i < platforms.size(); ++i) {
 				platforms[i].Render(program, viewMatrix);

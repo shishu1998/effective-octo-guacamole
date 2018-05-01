@@ -4,8 +4,8 @@
 #include <vector>
 #include <SDL.h>
 #include <SDL_mixer.h>
-//#define level1FILE "map01.txt"
-#define level1FILE "mapA.txt"
+#define level1FILE "map01.txt"
+//#define level1FILE "mapA.txt"
 #define level2FILE "map02.txt"
 #define level3FILE "map03.txt"
 #define Solids {121, 122, 123, 124, 125, 130, 152, 155, 162}
@@ -20,7 +20,8 @@ public:
 	// TODO: set the default to be Menu once we have a menu
 	GameMode mode = Level1;
 
-	std::vector<Entity> entities;
+	std::vector<Entity> enemies;
+	std::vector<Entity> boxes;
 	std::vector<MovingPlatform> platforms;
 	std::unordered_set<int> solidTiles;
 	Entity player;
