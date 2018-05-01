@@ -93,6 +93,9 @@ void GameState::playerDeath() {
 		enemies[i].reset();
 		enemies[i].forward = true;
 	}
+	for (int i = 0; i < boxes.size(); ++i) {
+		boxes[i].reset();
+	}
 	FlareMap& map = chooseMap();
 	//put the key back and lock the door if the player already has a key
 	if (playerHasKey) {
@@ -149,6 +152,26 @@ void GameState::updateLevel(float elapsed)
 			enemies[i].acceleration.x = -0.5;
 			enemies[i].forward = true;
 		}
+		//Enemies respawn if goes out of bounds
+		if (checkEntityOutOfBounds(enemies[i])) enemies[i].reset();
+	}
+
+	//Boxes falling(possibly) update
+	for (int i = 0; i < boxes.size(); ++i) {
+		boxes[i].Update(elapsed, map.mapData, solidTiles);
+
+		//Player Collision with Box
+		player.SATCollidesWith(boxes[i], penetration);
+		if (penetration.second > 0 && player.velocity.y < 0){
+			player.velocity.y = 0;
+			player.collidedBottom = true;
+		}
+		else if (penetration.second < 0) {
+			player.velocity.y = 0;
+			player.collidedTop = true;
+		}
+		//Boxes respawn if fallen out of bounds
+		if (checkEntityOutOfBounds(boxes[i])) boxes[i].reset();
 	}
 
 	//Platform update, also resolves platform player collision + movement
@@ -268,7 +291,9 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 		platforms.emplace_back(plat);
 	}
 	else if (type == "Box") {
-
+		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 191, tileSize) }), Box, false);
+		box.originalPosition = box.Position;
+		boxes.emplace_back(box);
 	}
 }
 
@@ -283,6 +308,9 @@ void GameState::Render(ShaderProgram & program)
 			player.Render(program, viewMatrix);
 			for (int i = 0; i < enemies.size(); ++i) {
 				enemies[i].Render(program, viewMatrix);
+			}
+			for (int i = 0; i < boxes.size(); ++i) {
+				boxes[i].Render(program, viewMatrix);
 			}
 			for (int i = 0; i < platforms.size(); ++i) {
 				platforms[i].Render(program, viewMatrix);

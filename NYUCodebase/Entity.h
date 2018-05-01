@@ -9,7 +9,7 @@
 #define GRAVITY -4.9f
 #define AnimationConstant 0.2f
 
-enum EntityType {Player, Enemy, MovingBlock};
+enum EntityType {Player, Enemy, MovingBlock, Box};
 class Entity {
 public:
 	Entity();
