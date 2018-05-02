@@ -81,6 +81,11 @@ void GameState::goToNextLevel() {
 		case Level3:
 			mode = Victory;
 			break;
+		case Defeat:
+			mode = Level1;
+			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
+			lives = 3;
+			break;
 	}
 }
 
@@ -115,7 +120,6 @@ void GameState::playerDeath() {
 	//player has no lives left; game over
 	if (!lives) {
 		mode = Defeat;
-		//goToNextLevel();
 	}
 }
 
@@ -347,6 +351,7 @@ void GameState::Render(ShaderProgram & program)
 			viewMatrix.Identity();
 			glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
 			DrawMessage(program, fontTextureID, "git gud", -0.5f, 0.0f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.9f, -0.5f, 0.3f, -0.15f);
 			break;
 		}
 }
