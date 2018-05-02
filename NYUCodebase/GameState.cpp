@@ -56,6 +56,7 @@ void GameState::goToNextLevel() {
 		case Menu:
 			lives = 3;
 			mode = Level1;
+			player.reset();
 			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
 			break;
 		case Level1:
@@ -83,15 +84,15 @@ void GameState::goToNextLevel() {
 			mode = Victory;
 			break;
 		case Victory:
-			mode = Level1;
-			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
-			lives = 3;
-			player.reset();
+			mode = Menu;
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			break;
 		case Defeat:
-			mode = Level1;
-			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
-			lives = 3;
-			player.reset();
+			mode = Menu;
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			break;
+		case Instruction:
+			mode = Menu;
 			break;
 	}
 }
@@ -284,19 +285,36 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 }
 
 void GameState::processEvents(SDL_Event &event) {
-	switch (mode) {
-	case Defeat:
-	case Victory:
-			//Selecting "back to menu" on defeat screen
-		if (event.type == SDL_MOUSEBUTTONDOWN) {
-			float mouseX = (((float)event.button.x / 960.0f) * 7.1f) - 3.55f;
-			float mouseY = (((float)(540.0f - event.button.y) / 540.0f) * 4.0f) - 2.0f;
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			if (mouseX >= -1.0f && mouseX <= 1.0f && mouseY >= -0.6f && mouseY <= -0.35f) {
+	if (event.type == SDL_MOUSEBUTTONDOWN) {
+		float mouseX = (((float)event.button.x / 960.0f) * 7.1f) - 3.55f;
+		float mouseY = (((float)(540.0f - event.button.y) / 540.0f) * 4.0f) - 2.0f;
+		switch (mode) {
+		case Defeat:
+		case Victory:
+			if (mouseX >= -0.475f && mouseX <= 0.475f && mouseY >= -0.62f && mouseY <= -0.37f) {
 				goToNextLevel();
 			}
+			break;
+		case Menu:
+			if (mouseX >= -0.7f && mouseX <= 0.7f && mouseY >= -0.15f && mouseY <= 0.15f) {
+				goToNextLevel();
+			}
+			//Instructions
+			else if (mouseX >= -0.85f && mouseX <= 0.85f && mouseY >= -0.62f && mouseY <= -0.37f) {
+				mode = Instruction;
+			}
+			//Exit game
+			else if (mouseX >= -0.625f && mouseX <= 0.625f && mouseY >= -1.15f && mouseY <= -0.85f) {
+				//Change this code to exit the window
+				mode = Level1;
+			}
+			break;
+		case Instruction:
+			if (mouseX >= -0.85f && mouseX <= 0.85f && mouseY >= -1.4f && mouseY <= -1.1f) {
+				goToNextLevel();
+			}
+			break;
 		}
-		break;
 	}
 }
 
@@ -369,16 +387,30 @@ void GameState::Render(ShaderProgram & program)
 		case Victory:
 			viewMatrix.Identity();
 			glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
-			DrawMessage(program, fontTextureID, "VICTORY", -0.5f, 0.0f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.9f, -0.5f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "VICTORY", -0.375f, 0.0f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f);
 			break;
 		case Defeat:
 			viewMatrix.Identity();
 			glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
-			DrawMessage(program, fontTextureID, "git gud", -0.5f, 0.0f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.9f, -0.5f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "git gud", -0.375f, 0.0f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f);
 			break;
 		case Menu:
+			viewMatrix.Identity();
+			glClearColor(0.0, 0.0, 0.0, 1.0f);
+			DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f);
+			DrawMessage(program, fontTextureID, "Start game", -0.6f, 0.0, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Exit game", -0.525f, -1.0, 0.3f, -0.15f);
+			break;
+		case Instruction:
+			viewMatrix.Identity();
+			glClearColor(0.0, 0.0f, 0.0f, 1.0f);
+			DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f);
+			DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.0f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.5f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -1.25f, 0.3f, -0.15f);
 			break;
 		}
 }
