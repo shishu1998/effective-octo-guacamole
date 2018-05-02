@@ -39,6 +39,7 @@ public:
 	bool canJumpLeft(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
 	bool canJumpRight(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
 
+	void setResetProperties();
 	void reset();
 
 	std::vector<SheetSprite> sprites;

@@ -13,5 +13,6 @@ public:
 	void MovingPlatform::Render(ShaderProgram & Program, Matrix viewMatrix);
 	void MovingPlatform::Update(float elapsed, const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids, Entity& player);
 	bool MovingPlatform::CollidesWith(Entity& other);
+	void setResetProperties();
 	void reset();
 };

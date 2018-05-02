@@ -57,8 +57,9 @@ public:
 	void loadResources();
 	FlareMap& chooseMap();
 	void GameState::setExitCoordinates(const FlareMap& map);
+	void setupLevel();
 	void goToNextLevel();
-	void setUpHealth();
+	void setupHealth();
 	void playerDeath();
 	void pickUpKey(int gridY, int gridX);
 	void updateGameState(float elapsed);

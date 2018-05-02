@@ -10,7 +10,7 @@ void GameState::loadResources() {
 	map3.Load(level3FILE);
 
 	for (int i = 0; i < 3; ++i) {
-		Entity health = Entity(0.0, 1.0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 377, tileSize), createSheetSpriteBySpriteIndex(TextureID, 378, tileSize) }), Health, false);
+		Entity health = Entity(-3.55 + (i+1)*tileSize, 2.0 - tileSize/2, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), Health, false);
 		health.originalPosition = health.Position;
 		healthSprites.emplace_back(health);
 	}
@@ -54,39 +54,32 @@ void GameState::setExitCoordinates(const FlareMap& map) {
 	}
 }
 
+void GameState::setupLevel() {
+	FlareMap& map = chooseMap();
+	enemies.clear();
+	boxes.clear();
+	platforms.clear();
+	for (int i = 0; i < map.entities.size(); i++) {
+		PlaceEntity(map.entities[i].type, map.entities[i].x * tileSize, map.entities[i].y * -tileSize);
+	}
+	setExitCoordinates(map);
+}
+
 void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
 			mode = Level1;
-			enemies.clear();
-			boxes.clear();
-			platforms.clear();
-			for (int i = 0; i < map1.entities.size(); i++) {
-				PlaceEntity(map1.entities[i].type, map1.entities[i].x * tileSize, map1.entities[i].y * -tileSize);
-			}
-			setUpHealth();
-			setExitCoordinates(map1);
+			setupHealth();
+			setupLevel();
 			break;
 		case Level1:
 			mode = Level2;
-			enemies.clear();
-			boxes.clear();
-			platforms.clear();
 			glClearColor(0.455f, 0.0f, 0.416f, 1.0f);
-			for (int i = 0; i < map2.entities.size(); i++) {
-				PlaceEntity(map2.entities[i].type, map2.entities[i].x * tileSize, map2.entities[i].y * -tileSize);
-			}
-			setExitCoordinates(map2);
+			setupLevel();
 			break;
 		case Level2:
 			mode = Level3;
-			enemies.clear();
-			boxes.clear();
-			platforms.clear();
-			for (int i = 0; i < map3.entities.size(); i++) {
-				PlaceEntity(map3.entities[i].type, map3.entities[i].x * tileSize, map3.entities[i].y * -tileSize);
-			}
-			setExitCoordinates(map3);
+			setupLevel();
 			break;
 		case Level3:
 			mode = Victory;
@@ -94,7 +87,7 @@ void GameState::goToNextLevel() {
 	}
 }
 
-void GameState::setUpHealth()
+void GameState::setupHealth()
 {
 	for (int i = 0; i < healthSprites.size(); ++i) {
 		healthSprites[i].parent = &player;
@@ -229,6 +222,7 @@ void GameState::updateLevel(float elapsed)
 		if (invulTime <= 0) {
 			if (player.SATCollidesWith(enemies[i], penetration)) {
 				playerHealth -= 1;
+				healthSprites[playerHealth].spriteIndex += 1;
 				invulTime = 1.5;
 				Mix_PlayChannel(-1, ghost, 0);
 			}
@@ -287,9 +281,6 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 			Mix_PlayChannel(-1, doorLock, 0);
 		}
 	}
-	if (keys[SDL_SCANCODE_Q]) {
-		player.Rotate(0.1);
-	}
 	if (keys[SDL_SCANCODE_SPACE] && canJump) {
 		if (player.collidedBottom) {
 			player.velocity.y = 2.5;
@@ -324,34 +315,30 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 {
 	if (type == "Player") {
 		player = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }), Player, false);
-		player.originalPosition = player.Position;
-		player.originalVelocity = player.velocity;
-		player.originalAcceleration = player.acceleration;
+		player.setResetProperties();
 	}
 	else if (type == "Enemy") {
 		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), Enemy, false);
 		enemy.acceleration.x = -0.5;
-		enemy.originalPosition = enemy.Position;
-		enemy.originalVelocity = enemy.velocity;
-		enemy.originalAcceleration = enemy.acceleration;
+		enemy.setResetProperties();
 		enemy.forward = true;
 		enemies.emplace_back(enemy);
 	}
 	else if (type == "MovingX") {
 		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
 		plat.acceleration.x = 0.3;
-		plat.originalAcceleration = plat.acceleration;
+		plat.setResetProperties();
 		platforms.emplace_back(plat);
 	}
 	else if (type == "MovingY") {
 		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
 		plat.acceleration.y = 0.3;
-		plat.originalAcceleration = plat.acceleration;
+		plat.setResetProperties();
 		platforms.emplace_back(plat);
 	}
 	else if (type == "Box") {
 		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 191, tileSize) }), Box, false);
-		box.originalPosition = box.Position;
+		box.setResetProperties();
 		boxes.emplace_back(box);
 	}
 }
@@ -373,6 +360,9 @@ void GameState::Render(ShaderProgram & program)
 			}
 			for (int i = 0; i < platforms.size(); ++i) {
 				platforms[i].Render(program, viewMatrix);
+			}
+			for (int i = 0; i < healthSprites.size(); ++i) {
+				healthSprites[i].Render(program, viewMatrix);
 			}
 			break;
 		}
