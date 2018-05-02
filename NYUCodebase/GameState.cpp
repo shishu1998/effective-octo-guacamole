@@ -6,16 +6,20 @@
 void GameState::loadResources() {
 	TextureID = LoadTexture(RESOURCE_FOLDER"spritesheet_rgba.png");
 	map1.Load(level1FILE);
-	// TODO: Move this into goToNextLevel once we have a menu
-	for (int i = 0; i < map1.entities.size(); i++) {
-		PlaceEntity(map1.entities[i].type, map1.entities[i].x * tileSize, map1.entities[i].y * -tileSize);
-	}
-	setExitCoordinates(map1);
 	map2.Load(level2FILE);
 	map3.Load(level3FILE);
+
+	for (int i = 0; i < 3; ++i) {
+		Entity health = Entity(0.0, 1.0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 377, tileSize), createSheetSpriteBySpriteIndex(TextureID, 378, tileSize) }), Health, false);
+		health.originalPosition = health.Position;
+		healthSprites.emplace_back(health);
+	}
+
 	solidTiles = std::unordered_set<int>(Solids);
 	fluidTiles = std::unordered_set<int>(Fluids);
+	
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
+	
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	bgm = Mix_LoadMUS("Running.mp3");
 	ghost = Mix_LoadWAV("ghost.wav");
@@ -54,6 +58,14 @@ void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
 			mode = Level1;
+			enemies.clear();
+			boxes.clear();
+			platforms.clear();
+			for (int i = 0; i < map1.entities.size(); i++) {
+				PlaceEntity(map1.entities[i].type, map1.entities[i].x * tileSize, map1.entities[i].y * -tileSize);
+			}
+			setUpHealth();
+			setExitCoordinates(map1);
 			break;
 		case Level1:
 			mode = Level2;
@@ -82,6 +94,13 @@ void GameState::goToNextLevel() {
 	}
 }
 
+void GameState::setUpHealth()
+{
+	for (int i = 0; i < healthSprites.size(); ++i) {
+		healthSprites[i].parent = &player;
+	}
+}
+
 //Plays the background music
 void GameState::playBackgroundMusic() const{
 	Mix_VolumeMusic(20);
@@ -91,6 +110,8 @@ void GameState::playBackgroundMusic() const{
 //Resets players and entities upon death
 void GameState::playerDeath() {
 	player.reset();
+	playerHealth = 3;
+	invulTime = 0;
 	for (int i = 0; i < enemies.size(); ++i) {
 		enemies[i].reset();
 		enemies[i].forward = true;
@@ -100,6 +121,9 @@ void GameState::playerDeath() {
 	}
 	for (int i = 0; i < platforms.size(); ++i) {
 		platforms[i].reset();
+	}
+	for (int i = 0; i < healthSprites.size(); ++i) {
+		healthSprites[i].reset();
 	}
 	FlareMap& map = chooseMap();
 	//put the key back and lock the door if the player already has a key
@@ -129,6 +153,9 @@ void GameState::pickUpKey(int gridY, int gridX) {
 //Updates the GameState based on the time elapsed
 void GameState::updateGameState(float elapsed) {
 	switch (mode) {
+	case Menu:
+		goToNextLevel();
+		break;
 	case Level1:
 	case Level2:
 	case Level3:
@@ -141,6 +168,17 @@ void GameState::updateLevel(float elapsed)
 {
 	std::pair<float, float> penetration;
 	FlareMap& map = chooseMap();
+
+	//Invulnerability update
+	if (invulTime > 0) {
+		playerBlink = !playerBlink;
+		invulTime -= elapsed;
+	}
+	else {
+		invulTime = 0;
+		playerBlink = false;
+	}
+	
 	player.Update(elapsed, map.mapData, solidTiles);
 	//This shouldn't ever happen, but just in case
 	if (checkEntityOutOfBounds(player)) player.reset();
@@ -186,13 +224,17 @@ void GameState::updateLevel(float elapsed)
 		platforms[i].Update(elapsed, map.mapData, solidTiles, player);
 	}
 
-	//Player restarts when touches an enemy
+	//Player loses health when touches an enemy
 	for (int i = 0; i < enemies.size(); ++i) {
-		if (player.SATCollidesWith(enemies[i], penetration)) {
-			playerDeath();
-			Mix_PlayChannel(-1, ghost, 0);
+		if (invulTime <= 0) {
+			if (player.SATCollidesWith(enemies[i], penetration)) {
+				playerHealth -= 1;
+				invulTime = 1.5;
+				Mix_PlayChannel(-1, ghost, 0);
+			}
 		}
 	}
+	if (playerHealth < 1) playerDeath();
 
 	//Player restarts when touches water/lava
 	int gridX, gridY;
@@ -244,6 +286,9 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 		else if (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) {
 			Mix_PlayChannel(-1, doorLock, 0);
 		}
+	}
+	if (keys[SDL_SCANCODE_Q]) {
+		player.Rotate(0.1);
 	}
 	if (keys[SDL_SCANCODE_SPACE] && canJump) {
 		if (player.collidedBottom) {
@@ -319,7 +364,7 @@ void GameState::Render(ShaderProgram & program)
 		case Level2:
 		case Level3:
 			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0);
-			player.Render(program, viewMatrix);
+			if(!playerBlink) player.Render(program, viewMatrix);
 			for (int i = 0; i < enemies.size(); ++i) {
 				enemies[i].Render(program, viewMatrix);
 			}

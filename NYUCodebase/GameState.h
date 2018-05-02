@@ -19,7 +19,7 @@ public:
 	FlareMap map2;
 	FlareMap map3;
 	// TODO: set the default to be Menu once we have a menu
-	GameMode mode = Level1;
+	GameMode mode = Menu;
 
 	std::vector<Entity> enemies;
 	std::vector<Entity> boxes;
@@ -30,6 +30,12 @@ public:
 
 	// Emulates keydown event, keys is faster than polling
 	bool canJump = true;
+
+	//Player Health and Invulnerability stuff
+	int playerHealth = 3;
+	float invulTime = 0;
+	bool playerBlink = false;
+	std::vector<Entity> healthSprites;
 
 	bool playerHasKey = false;
 	//stores the key's x,y tile coord after picked up
@@ -52,6 +58,7 @@ public:
 	FlareMap& chooseMap();
 	void GameState::setExitCoordinates(const FlareMap& map);
 	void goToNextLevel();
+	void setUpHealth();
 	void playerDeath();
 	void pickUpKey(int gridY, int gridX);
 	void updateGameState(float elapsed);

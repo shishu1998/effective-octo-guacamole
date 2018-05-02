@@ -9,7 +9,7 @@
 #define GRAVITY -4.9f
 #define AnimationConstant 0.2f
 
-enum EntityType {Player, Enemy, MovingBlock, Box};
+enum EntityType {Player, Enemy, MovingBlock, Box, Health};
 class Entity {
 public:
 	Entity();
@@ -58,6 +58,8 @@ public:
 	bool textured;
 	EntityType entityType;
 	
+	Entity* parent = nullptr;
+
 	bool collidedTop = false;
 	bool collidedBottom = false;
 	bool collidedLeft = false;

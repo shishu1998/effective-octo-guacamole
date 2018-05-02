@@ -296,4 +296,5 @@ void Entity::reset()
 	Position = originalPosition;
 	velocity = originalVelocity;
 	acceleration = originalAcceleration;
+	spriteIndex = 0;
 }
