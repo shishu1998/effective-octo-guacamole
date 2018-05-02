@@ -54,6 +54,7 @@ void GameState::setExitCoordinates(const FlareMap& map) {
 void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
+			lives = 3;
 			mode = Level1;
 			break;
 		case Level1:
@@ -340,6 +341,7 @@ void GameState::Render(ShaderProgram & program)
 		case Victory:
 			viewMatrix.Identity();
 			glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
+			DrawMessage(program, fontTextureID, "VICTORY", -0.5f, 0.0f, 0.3f, -0.15f);
 			break;
 		case Defeat:
 			viewMatrix.Identity();

@@ -19,7 +19,6 @@ SDL_Window* displayWindow;
 ShaderProgram program;
 Matrix projectionMatrix;
 const Uint8 *keys = SDL_GetKeyboardState(nullptr);
-int fontTextureID;
 float lastFrameTicks = 0.0f;
 float elapsed = 0.0f;
 float accumulator = 0.0f;

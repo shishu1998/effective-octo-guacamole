@@ -37,7 +37,7 @@ public:
 	int keyX, keyY;
 	//stores the coordinates of the exit
 	int doorX, doorY;
-	int lives = 1;
+	int lives = 3;
 
 	Matrix viewMatrix;
 
