@@ -56,6 +56,7 @@ void GameState::goToNextLevel() {
 		case Menu:
 			lives = 3;
 			mode = Level1;
+			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
 			break;
 		case Level1:
 			mode = Level2;
@@ -81,10 +82,16 @@ void GameState::goToNextLevel() {
 		case Level3:
 			mode = Victory;
 			break;
+		case Victory:
+			mode = Level1;
+			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
+			lives = 3;
+			player.reset();
 		case Defeat:
 			mode = Level1;
 			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
 			lives = 3;
+			player.reset();
 			break;
 	}
 }
@@ -276,6 +283,23 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 	if (!keys[SDL_SCANCODE_SPACE]) canJump = true;
 }
 
+void GameState::processEvents(SDL_Event &event) {
+	switch (mode) {
+	case Defeat:
+	case Victory:
+			//Selecting "back to menu" on defeat screen
+		if (event.type == SDL_MOUSEBUTTONDOWN) {
+			float mouseX = (((float)event.button.x / 960.0f) * 7.1f) - 3.55f;
+			float mouseY = (((float)(540.0f - event.button.y) / 540.0f) * 4.0f) - 2.0f;
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			if (mouseX >= -1.0f && mouseX <= 1.0f && mouseY >= -0.6f && mouseY <= -0.35f) {
+				goToNextLevel();
+			}
+		}
+		break;
+	}
+}
+
 //Checks if an entity fell out of the map
 bool GameState::checkEntityOutOfBounds(const Entity & other)
 {
@@ -346,12 +370,15 @@ void GameState::Render(ShaderProgram & program)
 			viewMatrix.Identity();
 			glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
 			DrawMessage(program, fontTextureID, "VICTORY", -0.5f, 0.0f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.9f, -0.5f, 0.3f, -0.15f);
 			break;
 		case Defeat:
 			viewMatrix.Identity();
 			glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
 			DrawMessage(program, fontTextureID, "git gud", -0.5f, 0.0f, 0.3f, -0.15f);
 			DrawMessage(program, fontTextureID, "Back to menu", -0.9f, -0.5f, 0.3f, -0.15f);
+			break;
+		case Menu:
 			break;
 		}
 }

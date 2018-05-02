@@ -62,14 +62,7 @@ int main(int argc, char *argv[])
 			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 				done = true;
 			}
-			//Selecting "back to menu" on defeat screen
-			else if (state.mode == Defeat && event.type == SDL_MOUSEBUTTONDOWN) {
-				float mouseX = (((float)event.button.x / 960.0f) * 3.55f) - 1.775f;
-				float mouseY = (((float)(540.0f - event.button.y) / 540.0f) * 2.0f) - 1.0f;
-				if (mouseX >= -0.55f && mouseX <= 0.45f && mouseY >= -0.3f && mouseY <= -0.15f) {
-					state.goToNextLevel();
-				}
-			}
+			state.processEvents(event);
 		}
 		state.processKeys(keys);
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
