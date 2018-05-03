@@ -19,7 +19,6 @@ public:
 	FlareMap map1;
 	FlareMap map2;
 	FlareMap map3;
-	// TODO: set the default to be Menu once we have a menu
 	GameMode mode = Menu;
 	bool finished = false;
 
