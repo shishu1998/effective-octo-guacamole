@@ -135,10 +135,7 @@ void GameState::playerDeath() {
 	FlareMap& map = chooseMap();
 	//put the key back and lock the door if the player already has a key
 	if (playerHasKey) {
-		map.mapData[keyY][keyX] = 14;
-		playerHasKey = false;
-		map.mapData[doorY][doorX] = 167;
-		map.mapData[doorY-1][doorX] = 166;
+		resetKey();
 	}
 	lives -= 1;
 	//player has no lives left; game over
@@ -302,7 +299,7 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 			resetKey();
 			goToNextLevel();
 		}
-		else if (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) {
+		else if (map.mapData[gridY][gridX] == 166 || map.mapData[gridY][gridX] == 167) {
 			Mix_PlayChannel(-1, doorLock, 0);
 		}
 	}
