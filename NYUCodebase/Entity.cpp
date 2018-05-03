@@ -152,11 +152,10 @@ void Entity::remakeMatrix() {
 	matrix.Identity();
 	matrix.Translate(Position.x, Position.y, Position.z);
 	matrix.Rotate(Rotation);
-	if (parent) {
-		matrix.Translate(parent->Position.x, parent->Position.y, parent->Position.z);
-		matrix.Rotate(parent -> Rotation);
-	}
 	matrix.Scale(size.x, size.y, size.z);
+	if (parent) {
+		matrix = matrix * parent->matrix;
+	}
 }
 
 //Updates the position of current entity and adjusts for collision

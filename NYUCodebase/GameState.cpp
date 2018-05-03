@@ -11,7 +11,8 @@ void GameState::loadResources() {
 	map3.Load(level3FILE);
 
 	for (int i = 0; i < 3; ++i) {
-		Entity health = Entity(-3.55 + (i+1)*tileSize, 2.0 - tileSize/2, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), Health, false);
+		Entity health = Entity(-16 + i, 9.0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), Health, false);
+		health.size = Vector4(1.0,1.0,1.0);
 		health.setResetProperties();
 		healthSprites.emplace_back(health);
 	}
