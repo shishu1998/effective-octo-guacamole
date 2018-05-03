@@ -65,6 +65,7 @@ public:
 	void setupHealth();
 	void playerDeath();
 	void pickUpKey(int gridY, int gridX);
+	void resetKey();
 	void updateGameState(float elapsed);
 	void updateLevel(float elapsed);
 	void processKeys(const Uint8 *keys);

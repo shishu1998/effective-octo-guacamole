@@ -162,6 +162,15 @@ void GameState::pickUpKey(int gridY, int gridX) {
 	map.mapData[doorY-1][doorX] = 136;
 }
 
+//Resets original key and door sprites
+void GameState::resetKey() {
+	FlareMap& map = chooseMap();
+	map.mapData[keyY][keyX] = 14;
+	map.mapData[doorY][doorX] = 167;
+	map.mapData[doorY - 1][doorX] = 166;
+	playerHasKey = false;
+}
+
 //Updates the GameState based on the time elapsed
 void GameState::updateGameState(float elapsed) {
 	switch (mode) {
@@ -290,7 +299,7 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 		FlareMap map = chooseMap();
 		if (map.mapData[gridY][gridX] == 137 || map.mapData[gridY][gridX] == 138) {
 			Mix_PlayChannel(-1, doorOpen, 0);
-			playerHasKey = false;
+			resetKey();
 			goToNextLevel();
 		}
 		else if (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) {
