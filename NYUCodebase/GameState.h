@@ -4,8 +4,8 @@
 #include <vector>
 #include <SDL.h>
 #include <SDL_mixer.h>
-#define level1FILE "map01.txt"
-//#define level1FILE "mapA.txt"
+//#define level1FILE "map01.txt"
+#define level1FILE "mapA.txt"
 #define level2FILE "mapB.txt"
 #define level3FILE "map03.txt"
 #define Solids {121, 122, 123, 124, 125, 130, 152, 155, 162, 182, 183, 184, 185, 212, 215, 222}
@@ -19,7 +19,6 @@ public:
 	FlareMap map1;
 	FlareMap map2;
 	FlareMap map3;
-	// TODO: set the default to be Menu once we have a menu
 	GameMode mode = Menu;
 	bool finished = false;
 
@@ -63,8 +62,10 @@ public:
 	void setupLevel();
 	void goToNextLevel();
 	void setupHealth();
+	void resetEntities();
 	void playerDeath();
 	void pickUpKey(int gridY, int gridX);
+	void resetKey();
 	void updateGameState(float elapsed);
 	void updateLevel(float elapsed);
 	void processKeys(const Uint8 *keys);

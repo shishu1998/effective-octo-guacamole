@@ -11,7 +11,8 @@ void GameState::loadResources() {
 	map3.Load(level3FILE);
 
 	for (int i = 0; i < 3; ++i) {
-		Entity health = Entity(-3.55 + (i+1)*tileSize, 2.0 - tileSize/2, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), Health, false);
+		Entity health = Entity(-16 + i, 9.0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), Health, false);
+		health.size = Vector4(1.0,1.0,1.0);
 		health.setResetProperties();
 		healthSprites.emplace_back(health);
 	}
@@ -69,7 +70,12 @@ void GameState::setupLevel() {
 void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
+			//Resets the player's lives and hp after every playthrough
 			lives = 3;
+			playerHealth = 3;
+			for (int i = 0; i < healthSprites.size(); ++i) {
+				healthSprites[i].reset();
+			}
 			mode = Level1;
 			setupHealth();
 			setupLevel();
@@ -114,11 +120,10 @@ void GameState::playBackgroundMusic() const{
 	Mix_PlayMusic(bgm, -1);
 }
 
-//Resets players and entities upon death
-void GameState::playerDeath() {
+//Resets the states of all entities in the GameState
+void GameState::resetEntities()
+{
 	player.reset();
-	playerHealth = 3;
-	invulTime = 0;
 	for (int i = 0; i < enemies.size(); ++i) {
 		enemies[i].reset();
 		enemies[i].forward = true;
@@ -132,13 +137,17 @@ void GameState::playerDeath() {
 	for (int i = 0; i < healthSprites.size(); ++i) {
 		healthSprites[i].reset();
 	}
+}
+
+//Resets players and entities upon death
+void GameState::playerDeath() {
+	playerHealth = 3;
+	invulTime = 0;
+	resetEntities();
 	FlareMap& map = chooseMap();
 	//put the key back and lock the door if the player already has a key
 	if (playerHasKey) {
-		map.mapData[keyY][keyX] = 14;
-		playerHasKey = false;
-		map.mapData[doorY][doorX] = 167;
-		map.mapData[doorY-1][doorX] = 166;
+		resetKey();
 	}
 	lives -= 1;
 	//player has no lives left; game over
@@ -160,6 +169,15 @@ void GameState::pickUpKey(int gridY, int gridX) {
 	//set door to "unlocked"
 	map.mapData[doorY][doorX] = 137;
 	map.mapData[doorY-1][doorX] = 136;
+}
+
+//Resets original key and door sprites
+void GameState::resetKey() {
+	FlareMap& map = chooseMap();
+	map.mapData[keyY][keyX] = 14;
+	map.mapData[doorY][doorX] = 167;
+	map.mapData[doorY - 1][doorX] = 166;
+	playerHasKey = false;
 }
 
 //Updates the GameState based on the time elapsed
@@ -287,13 +305,13 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 	if (keys[SDL_SCANCODE_W]) {
 		int gridX, gridY;
 		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
-		FlareMap map = chooseMap();
+		FlareMap& map = chooseMap();
 		if (map.mapData[gridY][gridX] == 137 || map.mapData[gridY][gridX] == 138) {
 			Mix_PlayChannel(-1, doorOpen, 0);
-			playerHasKey = false;
+			resetKey();
 			goToNextLevel();
 		}
-		else if (map.mapData[gridY][gridX] == 167 || map.mapData[gridY][gridX] == 168) {
+		else if (map.mapData[gridY][gridX] == 166 || map.mapData[gridY][gridX] == 167) {
 			Mix_PlayChannel(-1, doorLock, 0);
 		}
 	}
@@ -352,7 +370,7 @@ void GameState::processEvents(SDL_Event &event) {
 //Checks if an entity fell out of the map
 bool GameState::checkEntityOutOfBounds(const Entity & other)
 {
-	FlareMap map = chooseMap();
+	FlareMap& map = chooseMap();
 	int gridTop, gridBottom, gridLeft, gridRight;
 	worldToTileCoordinates(other.Position.x - other.size.x / 2, other.Position.y - other.size.y / 2, &gridLeft, &gridBottom);
 	worldToTileCoordinates(other.Position.x + other.size.x / 2, other.Position.y + other.size.y / 2, &gridRight, &gridTop);
