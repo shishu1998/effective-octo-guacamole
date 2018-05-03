@@ -305,8 +305,7 @@ void GameState::processEvents(SDL_Event &event) {
 			}
 			//Exit game
 			else if (mouseX >= -0.625f && mouseX <= 0.625f && mouseY >= -1.15f && mouseY <= -0.85f) {
-				//Change this code to exit the window
-				mode = Level1;
+				finished = true;
 			}
 			break;
 		case Instruction:

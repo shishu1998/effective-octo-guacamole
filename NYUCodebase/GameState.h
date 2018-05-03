@@ -21,6 +21,7 @@ public:
 	FlareMap map3;
 	// TODO: set the default to be Menu once we have a menu
 	GameMode mode = Menu;
+	bool finished = false;
 
 	std::vector<Entity> enemies;
 	std::vector<Entity> boxes;

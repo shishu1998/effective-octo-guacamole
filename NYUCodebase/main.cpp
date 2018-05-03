@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
 				done = true;
 			}
 			state.processEvents(event);
+			if (state.finished) done = true;
 		}
 		state.processKeys(keys);
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
