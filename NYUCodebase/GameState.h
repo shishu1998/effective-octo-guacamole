@@ -33,12 +33,18 @@ public:
 	// Emulates keydown event, keys is faster than polling
 	bool canJump = true;
 
+	//Player Health, Lives, and Invulnerability stuff
+	int lives = 3;
+	int playerHealth = 3;
+	float invulTime = 0;
+	bool playerBlink = false;
+	std::vector<Entity> healthSprites;
+
 	bool playerHasKey = false;
 	//stores the key's x,y tile coord after picked up
 	int keyX, keyY;
 	//stores the coordinates of the exit
 	int doorX, doorY;
-	int lives = 3;
 
 	Matrix viewMatrix;
 
@@ -54,7 +60,9 @@ public:
 	void loadResources();
 	FlareMap& chooseMap();
 	void GameState::setExitCoordinates(const FlareMap& map);
+	void setupLevel();
 	void goToNextLevel();
+	void setupHealth();
 	void playerDeath();
 	void pickUpKey(int gridY, int gridX);
 	void updateGameState(float elapsed);

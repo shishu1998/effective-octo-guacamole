@@ -9,7 +9,7 @@
 #define GRAVITY -4.9f
 #define AnimationConstant 0.2f
 
-enum EntityType {Player, Enemy, MovingBlock, Box};
+enum EntityType {Player, Enemy, MovingBlock, Box, Health};
 class Entity {
 public:
 	Entity();
@@ -39,6 +39,7 @@ public:
 	bool canJumpLeft(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
 	bool canJumpRight(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
 
+	void setResetProperties();
 	void reset();
 
 	std::vector<SheetSprite> sprites;
@@ -58,6 +59,8 @@ public:
 	bool textured;
 	EntityType entityType;
 	
+	Entity* parent = nullptr;
+
 	bool collidedTop = false;
 	bool collidedBottom = false;
 	bool collidedLeft = false;

@@ -152,6 +152,10 @@ void Entity::remakeMatrix() {
 	matrix.Identity();
 	matrix.Translate(Position.x, Position.y, Position.z);
 	matrix.Rotate(Rotation);
+	if (parent) {
+		matrix.Translate(parent->Position.x, parent->Position.y, parent->Position.z);
+		matrix.Rotate(parent -> Rotation);
+	}
 	matrix.Scale(size.x, size.y, size.z);
 }
 
@@ -290,10 +294,19 @@ bool Entity::canJumpRight(const std::vector<std::vector<unsigned int>>& mapData,
 	return false;
 }
 
+//Set the current state of the entity to the properties that we will reset to
+void Entity::setResetProperties()
+{
+	originalPosition = Position;
+	originalVelocity = velocity;
+	originalAcceleration = acceleration;
+}
+
 //Resets the position, velocity, and acceleration of the entity
 void Entity::reset()
 {
 	Position = originalPosition;
 	velocity = originalVelocity;
 	acceleration = originalAcceleration;
+	spriteIndex = 0;
 }

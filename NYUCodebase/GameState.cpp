@@ -7,12 +7,20 @@ void GameState::loadResources() {
 	TextureID = LoadTexture(RESOURCE_FOLDER"spritesheet_rgba.png");
 	fontTextureID = LoadTexture(RESOURCE_FOLDER"font1.png");
 	map1.Load(level1FILE);
-	setExitCoordinates(map1);
 	map2.Load(level2FILE);
 	map3.Load(level3FILE);
+
+	for (int i = 0; i < 3; ++i) {
+		Entity health = Entity(-3.55 + (i+1)*tileSize, 2.0 - tileSize/2, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), Health, false);
+		health.setResetProperties();
+		healthSprites.emplace_back(health);
+	}
+
 	solidTiles = std::unordered_set<int>(Solids);
 	fluidTiles = std::unordered_set<int>(Fluids);
+	
 	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
+	
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	bgm = Mix_LoadMUS("Running.mp3");
 	ghost = Mix_LoadWAV("ghost.wav");
@@ -47,36 +55,34 @@ void GameState::setExitCoordinates(const FlareMap& map) {
 	}
 }
 
+void GameState::setupLevel() {
+	FlareMap& map = chooseMap();
+	enemies.clear();
+	boxes.clear();
+	platforms.clear();
+	for (int i = 0; i < map.entities.size(); i++) {
+		PlaceEntity(map.entities[i].type, map.entities[i].x * tileSize, map.entities[i].y * -tileSize);
+	}
+	setExitCoordinates(map);
+}
+
 void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
 			lives = 3;
 			mode = Level1;
+			setupHealth();
+			setupLevel();
 			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
-			for (int i = 0; i < map1.entities.size(); i++) {
-				PlaceEntity(map1.entities[i].type, map1.entities[i].x * tileSize, map1.entities[i].y * -tileSize);
-			}
 			break;
 		case Level1:
 			mode = Level2;
-			enemies.clear();
-			boxes.clear();
-			platforms.clear();
 			glClearColor(0.455f, 0.0f, 0.416f, 1.0f);
-			for (int i = 0; i < map2.entities.size(); i++) {
-				PlaceEntity(map2.entities[i].type, map2.entities[i].x * tileSize, map2.entities[i].y * -tileSize);
-			}
-			setExitCoordinates(map2);
+			setupLevel();
 			break;
 		case Level2:
 			mode = Level3;
-			enemies.clear();
-			boxes.clear();
-			platforms.clear();
-			for (int i = 0; i < map3.entities.size(); i++) {
-				PlaceEntity(map3.entities[i].type, map3.entities[i].x * tileSize, map3.entities[i].y * -tileSize);
-			}
-			setExitCoordinates(map3);
+			setupLevel();
 			break;
 		case Level3:
 			mode = Victory;
@@ -95,6 +101,13 @@ void GameState::goToNextLevel() {
 	}
 }
 
+void GameState::setupHealth()
+{
+	for (int i = 0; i < healthSprites.size(); ++i) {
+		healthSprites[i].parent = &player;
+	}
+}
+
 //Plays the background music
 void GameState::playBackgroundMusic() const{
 	Mix_VolumeMusic(20);
@@ -104,6 +117,8 @@ void GameState::playBackgroundMusic() const{
 //Resets players and entities upon death
 void GameState::playerDeath() {
 	player.reset();
+	playerHealth = 3;
+	invulTime = 0;
 	for (int i = 0; i < enemies.size(); ++i) {
 		enemies[i].reset();
 		enemies[i].forward = true;
@@ -113,6 +128,9 @@ void GameState::playerDeath() {
 	}
 	for (int i = 0; i < platforms.size(); ++i) {
 		platforms[i].reset();
+	}
+	for (int i = 0; i < healthSprites.size(); ++i) {
+		healthSprites[i].reset();
 	}
 	FlareMap& map = chooseMap();
 	//put the key back and lock the door if the player already has a key
@@ -159,6 +177,17 @@ void GameState::updateLevel(float elapsed)
 {
 	std::pair<float, float> penetration;
 	FlareMap& map = chooseMap();
+
+	//Invulnerability update
+	if (invulTime > 0) {
+		playerBlink = !playerBlink;
+		invulTime -= elapsed;
+	}
+	else {
+		invulTime = 0;
+		playerBlink = false;
+	}
+	
 	player.Update(elapsed, map.mapData, solidTiles);
 	//This shouldn't ever happen, but just in case
 	if (checkEntityOutOfBounds(player)) player.reset();
@@ -204,13 +233,18 @@ void GameState::updateLevel(float elapsed)
 		platforms[i].Update(elapsed, map.mapData, solidTiles, player);
 	}
 
-	//Player restarts when touches an enemy
+	//Player loses health when touches an enemy
 	for (int i = 0; i < enemies.size(); ++i) {
-		if (player.SATCollidesWith(enemies[i], penetration)) {
-			playerDeath();
-			Mix_PlayChannel(-1, ghost, 0);
+		if (invulTime <= 0) {
+			if (player.SATCollidesWith(enemies[i], penetration)) {
+				playerHealth -= 1;
+				healthSprites[playerHealth].spriteIndex += 1;
+				invulTime = 1.5;
+				Mix_PlayChannel(-1, ghost, 0);
+			}
 		}
 	}
+	if (playerHealth < 1) playerDeath();
 
 	//Player restarts when touches water/lava
 	int gridX, gridY;
@@ -330,34 +364,30 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 {
 	if (type == "Player") {
 		player = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }), Player, false);
-		player.originalPosition = player.Position;
-		player.originalVelocity = player.velocity;
-		player.originalAcceleration = player.acceleration;
+		player.setResetProperties();
 	}
 	else if (type == "Enemy") {
 		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), Enemy, false);
 		enemy.acceleration.x = -0.5;
-		enemy.originalPosition = enemy.Position;
-		enemy.originalVelocity = enemy.velocity;
-		enemy.originalAcceleration = enemy.acceleration;
+		enemy.setResetProperties();
 		enemy.forward = true;
 		enemies.emplace_back(enemy);
 	}
 	else if (type == "MovingX") {
 		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
 		plat.acceleration.x = 0.3;
-		plat.originalAcceleration = plat.acceleration;
+		plat.setResetProperties();
 		platforms.emplace_back(plat);
 	}
 	else if (type == "MovingY") {
 		MovingPlatform plat = MovingPlatform(TextureID, x, y, 3);
 		plat.acceleration.y = 0.3;
-		plat.originalAcceleration = plat.acceleration;
+		plat.setResetProperties();
 		platforms.emplace_back(plat);
 	}
 	else if (type == "Box") {
 		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 191, tileSize) }), Box, false);
-		box.originalPosition = box.Position;
+		box.setResetProperties();
 		boxes.emplace_back(box);
 	}
 }
@@ -370,7 +400,7 @@ void GameState::Render(ShaderProgram & program)
 		case Level2:
 		case Level3:
 			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0);
-			player.Render(program, viewMatrix);
+			if(!playerBlink) player.Render(program, viewMatrix);
 			for (int i = 0; i < enemies.size(); ++i) {
 				enemies[i].Render(program, viewMatrix);
 			}
@@ -379,6 +409,9 @@ void GameState::Render(ShaderProgram & program)
 			}
 			for (int i = 0; i < platforms.size(); ++i) {
 				platforms[i].Render(program, viewMatrix);
+			}
+			for (int i = 0; i < healthSprites.size(); ++i) {
+				healthSprites[i].Render(program, viewMatrix);
 			}
 			break;
 		case Victory:
