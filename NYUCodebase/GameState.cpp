@@ -12,7 +12,7 @@ void GameState::loadResources() {
 
 	for (int i = 0; i < 3; ++i) {
 		Entity health = Entity(-3.55 + (i+1)*tileSize, 2.0 - tileSize/2, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), Health, false);
-		health.originalPosition = health.Position;
+		health.setResetProperties();
 		healthSprites.emplace_back(health);
 	}
 
