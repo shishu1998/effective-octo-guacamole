@@ -15,11 +15,13 @@ enum GameMode { Menu, Instruction, Quit, Level1, Level2, Level3, Victory, Defeat
 class GameState {
 public:
 	int TextureID;
+	int fontTextureID;
 	FlareMap map1;
 	FlareMap map2;
 	FlareMap map3;
 	// TODO: set the default to be Menu once we have a menu
 	GameMode mode = Menu;
+	bool finished = false;
 
 	std::vector<Entity> enemies;
 	std::vector<Entity> boxes;
@@ -42,6 +44,7 @@ public:
 	int keyX, keyY;
 	//stores the coordinates of the exit
 	int doorX, doorY;
+	int lives = 3;
 
 	Matrix viewMatrix;
 
@@ -66,6 +69,7 @@ public:
 	void updateLevel(float elapsed);
 	void processKeys(const Uint8 *keys);
 	void processKeysInLevel(const Uint8 *keys);
+	void processEvents(SDL_Event &event);
 	bool checkEntityOutOfBounds(const Entity& other);
 	void PlaceEntity(std::string type, float x, float y);
 	void Render(ShaderProgram &program);

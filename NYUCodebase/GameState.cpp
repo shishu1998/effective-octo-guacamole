@@ -5,6 +5,7 @@
 //Loads the required resources for the entities
 void GameState::loadResources() {
 	TextureID = LoadTexture(RESOURCE_FOLDER"spritesheet_rgba.png");
+	fontTextureID = LoadTexture(RESOURCE_FOLDER"font1.png");
 	map1.Load(level1FILE);
 	map2.Load(level2FILE);
 	map3.Load(level3FILE);
@@ -68,6 +69,7 @@ void GameState::setupLevel() {
 void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
+			lives = 3;
 			mode = Level1;
 			setupHealth();
 			setupLevel();
@@ -83,6 +85,17 @@ void GameState::goToNextLevel() {
 			break;
 		case Level3:
 			mode = Victory;
+			break;
+		case Victory:
+			mode = Menu;
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			break;
+		case Defeat:
+			mode = Menu;
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			break;
+		case Instruction:
+			mode = Menu;
 			break;
 	}
 }
@@ -126,6 +139,11 @@ void GameState::playerDeath() {
 		map.mapData[doorY][doorX] = 167;
 		map.mapData[doorY-1][doorX] = 166;
 	}
+	lives -= 1;
+	//player has no lives left; game over
+	if (!lives) {
+		mode = Defeat;
+	}
 }
 
 //Player picks up key
@@ -146,9 +164,6 @@ void GameState::pickUpKey(int gridY, int gridX) {
 //Updates the GameState based on the time elapsed
 void GameState::updateGameState(float elapsed) {
 	switch (mode) {
-	case Menu:
-		goToNextLevel();
-		break;
 	case Level1:
 	case Level2:
 	case Level3:
@@ -300,6 +315,39 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 	if (!keys[SDL_SCANCODE_SPACE]) canJump = true;
 }
 
+void GameState::processEvents(SDL_Event &event) {
+	if (event.type == SDL_MOUSEBUTTONDOWN) {
+		float mouseX = (((float)event.button.x / 960.0f) * 7.1f) - 3.55f;
+		float mouseY = (((float)(540.0f - event.button.y) / 540.0f) * 4.0f) - 2.0f;
+		switch (mode) {
+		case Defeat:
+		case Victory:
+			if (mouseX >= -0.475f && mouseX <= 0.475f && mouseY >= -0.62f && mouseY <= -0.37f) {
+				goToNextLevel();
+			}
+			break;
+		case Menu:
+			if (mouseX >= -0.7f && mouseX <= 0.7f && mouseY >= -0.15f && mouseY <= 0.15f) {
+				goToNextLevel();
+			}
+			//Instructions
+			else if (mouseX >= -0.85f && mouseX <= 0.85f && mouseY >= -0.62f && mouseY <= -0.37f) {
+				mode = Instruction;
+			}
+			//Exit game
+			else if (mouseX >= -0.625f && mouseX <= 0.625f && mouseY >= -1.15f && mouseY <= -0.85f) {
+				finished = true;
+			}
+			break;
+		case Instruction:
+			if (mouseX >= -0.85f && mouseX <= 0.85f && mouseY >= -1.4f && mouseY <= -1.1f) {
+				goToNextLevel();
+			}
+			break;
+		}
+	}
+}
+
 //Checks if an entity fell out of the map
 bool GameState::checkEntityOutOfBounds(const Entity & other)
 {
@@ -364,6 +412,34 @@ void GameState::Render(ShaderProgram & program)
 			for (int i = 0; i < healthSprites.size(); ++i) {
 				healthSprites[i].Render(program, viewMatrix);
 			}
+			break;
+		case Victory:
+			viewMatrix.Identity();
+			glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
+			DrawMessage(program, fontTextureID, "VICTORY", -0.375f, 0.0f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f);
+			break;
+		case Defeat:
+			viewMatrix.Identity();
+			glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
+			DrawMessage(program, fontTextureID, "git gud", -0.375f, 0.0f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f);
+			break;
+		case Menu:
+			viewMatrix.Identity();
+			glClearColor(0.0, 0.0, 0.0, 1.0f);
+			DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f);
+			DrawMessage(program, fontTextureID, "Start game", -0.6f, 0.0, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Exit game", -0.525f, -1.0, 0.3f, -0.15f);
+			break;
+		case Instruction:
+			viewMatrix.Identity();
+			glClearColor(0.0, 0.0f, 0.0f, 1.0f);
+			DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f);
+			DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.0f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.5f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -1.25f, 0.3f, -0.15f);
 			break;
 		}
 }

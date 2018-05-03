@@ -19,7 +19,6 @@ SDL_Window* displayWindow;
 ShaderProgram program;
 Matrix projectionMatrix;
 const Uint8 *keys = SDL_GetKeyboardState(nullptr);
-int fontTextureID;
 float lastFrameTicks = 0.0f;
 float elapsed = 0.0f;
 float accumulator = 0.0f;
@@ -55,14 +54,14 @@ int main(int argc, char *argv[])
 {
 	init();
 	SDL_Event event;
-	bool done = false;
 	state.playBackgroundMusic();
-	while (!done) {
+	while (!state.finished) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
-				done = true;
+				state.finished = true;
 			}
+			state.processEvents(event);
 		}
 		state.processKeys(keys);
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
