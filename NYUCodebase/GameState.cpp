@@ -69,7 +69,12 @@ void GameState::setupLevel() {
 void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
+			//Resets the player's lives and hp after every playthrough
 			lives = 3;
+			playerHealth = 3;
+			for (int i = 0; i < healthSprites.size(); ++i) {
+				healthSprites[i].reset();
+			}
 			mode = Level1;
 			setupHealth();
 			setupLevel();
@@ -114,11 +119,10 @@ void GameState::playBackgroundMusic() const{
 	Mix_PlayMusic(bgm, -1);
 }
 
-//Resets players and entities upon death
-void GameState::playerDeath() {
+//Resets the states of all entities in the GameState
+void GameState::resetEntities()
+{
 	player.reset();
-	playerHealth = 3;
-	invulTime = 0;
 	for (int i = 0; i < enemies.size(); ++i) {
 		enemies[i].reset();
 		enemies[i].forward = true;
@@ -132,6 +136,13 @@ void GameState::playerDeath() {
 	for (int i = 0; i < healthSprites.size(); ++i) {
 		healthSprites[i].reset();
 	}
+}
+
+//Resets players and entities upon death
+void GameState::playerDeath() {
+	playerHealth = 3;
+	invulTime = 0;
+	resetEntities();
 	FlareMap& map = chooseMap();
 	//put the key back and lock the door if the player already has a key
 	if (playerHasKey) {

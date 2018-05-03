@@ -63,6 +63,7 @@ public:
 	void setupLevel();
 	void goToNextLevel();
 	void setupHealth();
+	void resetEntities();
 	void playerDeath();
 	void pickUpKey(int gridY, int gridX);
 	void resetKey();
