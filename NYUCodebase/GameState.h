@@ -33,7 +33,8 @@ public:
 	// Emulates keydown event, keys is faster than polling
 	bool canJump = true;
 
-	//Player Health and Invulnerability stuff
+	//Player Health, Lives, and Invulnerability stuff
+	int lives = 3;
 	int playerHealth = 3;
 	float invulTime = 0;
 	bool playerBlink = false;
@@ -44,7 +45,6 @@ public:
 	int keyX, keyY;
 	//stores the coordinates of the exit
 	int doorX, doorY;
-	int lives = 3;
 
 	Matrix viewMatrix;
 

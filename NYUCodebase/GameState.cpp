@@ -73,6 +73,7 @@ void GameState::goToNextLevel() {
 			mode = Level1;
 			setupHealth();
 			setupLevel();
+			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
 			break;
 		case Level1:
 			mode = Level2;
