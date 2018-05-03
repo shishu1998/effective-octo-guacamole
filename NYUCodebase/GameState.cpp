@@ -52,7 +52,6 @@ void GameState::goToNextLevel() {
 		case Menu:
 			lives = 3;
 			mode = Level1;
-			player.reset();
 			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
 			for (int i = 0; i < map1.entities.size(); i++) {
 				PlaceEntity(map1.entities[i].type, map1.entities[i].x * tileSize, map1.entities[i].y * -tileSize);
