@@ -7,10 +7,6 @@ void GameState::loadResources() {
 	TextureID = LoadTexture(RESOURCE_FOLDER"spritesheet_rgba.png");
 	fontTextureID = LoadTexture(RESOURCE_FOLDER"font1.png");
 	map1.Load(level1FILE);
-	// TODO: Move this into goToNextLevel once we have a menu
-	for (int i = 0; i < map1.entities.size(); i++) {
-		PlaceEntity(map1.entities[i].type, map1.entities[i].x * tileSize, map1.entities[i].y * -tileSize);
-	}
 	setExitCoordinates(map1);
 	map2.Load(level2FILE);
 	map3.Load(level3FILE);
@@ -58,6 +54,9 @@ void GameState::goToNextLevel() {
 			mode = Level1;
 			player.reset();
 			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
+			for (int i = 0; i < map1.entities.size(); i++) {
+				PlaceEntity(map1.entities[i].type, map1.entities[i].x * tileSize, map1.entities[i].y * -tileSize);
+			}
 			break;
 		case Level1:
 			mode = Level2;
