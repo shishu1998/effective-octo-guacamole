@@ -293,7 +293,7 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 	if (keys[SDL_SCANCODE_W]) {
 		int gridX, gridY;
 		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
-		FlareMap map = chooseMap();
+		FlareMap& map = chooseMap();
 		if (map.mapData[gridY][gridX] == 137 || map.mapData[gridY][gridX] == 138) {
 			Mix_PlayChannel(-1, doorOpen, 0);
 			resetKey();
@@ -358,7 +358,7 @@ void GameState::processEvents(SDL_Event &event) {
 //Checks if an entity fell out of the map
 bool GameState::checkEntityOutOfBounds(const Entity & other)
 {
-	FlareMap map = chooseMap();
+	FlareMap& map = chooseMap();
 	int gridTop, gridBottom, gridLeft, gridRight;
 	worldToTileCoordinates(other.Position.x - other.size.x / 2, other.Position.y - other.size.y / 2, &gridLeft, &gridBottom);
 	worldToTileCoordinates(other.Position.x + other.size.x / 2, other.Position.y + other.size.y / 2, &gridRight, &gridTop);
