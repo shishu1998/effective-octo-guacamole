@@ -54,16 +54,14 @@ int main(int argc, char *argv[])
 {
 	init();
 	SDL_Event event;
-	bool done = false;
 	state.playBackgroundMusic();
-	while (!done) {
+	while (!state.finished) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
-				done = true;
+				state.finished = true;
 			}
 			state.processEvents(event);
-			if (state.finished) done = true;
 		}
 		state.processKeys(keys);
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
