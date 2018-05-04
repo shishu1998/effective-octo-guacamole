@@ -24,12 +24,19 @@ void GameState::loadResources() {
 	
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	bgm = Mix_LoadMUS("Running.mp3");
+	menuMusic = Mix_LoadMUS("MenuMusic.mp3");
+	L1Music = Mix_LoadMUS("Level1.mp3");
+	L2Music = Mix_LoadMUS("Level2.mp3");
+	L3Music = Mix_LoadMUS("Level3.mp3");
+	victoryMusic = Mix_LoadMUS("Victory.mp3");
+	gameOverMusic = Mix_LoadMUS("GameOver.mp3");
 	ghost = Mix_LoadWAV("ghost.wav");
 	jump = Mix_LoadWAV("boing_spring.wav");
 	keyPickUp = Mix_LoadWAV("coin.wav");
 	doorLock = Mix_LoadWAV("doorLock.wav");
 	doorOpen = Mix_LoadWAV("doorOpen.wav");
 	splash = Mix_LoadWAV("splash.wav");
+	lava = Mix_LoadWAV("Lava.wav");
 }
 
 FlareMap & GameState::chooseMap()
@@ -80,31 +87,38 @@ void GameState::goToNextLevel() {
 			setupHealth();
 			setupLevel();
 			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
+			playBackgroundMusic();
 			break;
 		case Level1:
 			mode = Level2;
 			glClearColor(0.455f, 0.0f, 0.416f, 1.0f);
 			setupLevel();
+			playBackgroundMusic();
 			break;
 		case Level2:
 			mode = Level3;
 			setupLevel();
+			playBackgroundMusic();
 			break;
 		case Level3:
 			mode = Victory;
+			playBackgroundMusic();
 			break;
 		case Victory:
 			mode = Menu;
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			playBackgroundMusic();
 			break;
 		case Defeat:
 			mode = Menu;
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			playBackgroundMusic();
 			break;
 		case Instruction:
 			mode = Menu;
 			break;
 	}
+	//playBackgroundMusic();
 }
 
 void GameState::setupHealth()
@@ -117,7 +131,28 @@ void GameState::setupHealth()
 //Plays the background music
 void GameState::playBackgroundMusic() const{
 	Mix_VolumeMusic(20);
-	Mix_PlayMusic(bgm, -1);
+	Mix_HaltMusic();
+	switch (mode) {
+	case Menu:
+	//case Instruction:
+		Mix_PlayMusic(menuMusic, -1);
+		break;
+	case Level1:
+		Mix_PlayMusic(L1Music, -1);
+		break;
+	case Level2:
+		Mix_PlayMusic(L2Music, -1);
+		break;
+	case Level3:
+		Mix_PlayMusic(L3Music, -1);
+		break;
+	case Victory:
+		Mix_PlayMusic(victoryMusic, -1);
+		break;
+	case Defeat:
+		Mix_PlayMusic(gameOverMusic, -1);
+		break;
+	}
 }
 
 //Resets the states of all entities in the GameState
@@ -153,6 +188,7 @@ void GameState::playerDeath() {
 	//player has no lives left; game over
 	if (!lives) {
 		mode = Defeat;
+		playBackgroundMusic();
 	}
 }
 
@@ -264,13 +300,19 @@ void GameState::updateLevel(float elapsed)
 	}
 	if (playerHealth < 1) playerDeath();
 
-	//Player restarts when touches water/lava
+	//Player restarts when touches water
 	int gridX, gridY;
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
-	if (fluidTiles.find(map.mapData[gridY][gridX]) != fluidTiles.end()) {
+	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 13) {
 		playerDeath();
 		Mix_PlayChannel(-1, splash, 0);
 	}
+	//Player restarts when touches lava
+	if (map.mapData[gridY][gridX] == 40 || map.mapData[gridY][gridX] == 42) {
+		playerDeath();
+		Mix_PlayChannel(-1, lava, 0);
+	}
+
 	//Player picks up key on collision
 	if (map.mapData[gridY][gridX] == 14) {
 		pickUpKey(gridY, gridX);
@@ -405,6 +447,11 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 	}
 	else if (type == "Box") {
 		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 191, tileSize) }), Box, false);
+		box.setResetProperties();
+		boxes.emplace_back(box);
+	}
+	else if (type == "Ice") {
+		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 491, tileSize) }), Box, false);
 		box.setResetProperties();
 		boxes.emplace_back(box);
 	}
