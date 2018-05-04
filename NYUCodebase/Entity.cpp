@@ -31,6 +31,12 @@ void Entity::UntexturedDraw(ShaderProgram & Program) {
 
 void Entity::Render(ShaderProgram & Program, Matrix viewMatrix)
 {
+
+	GLint alphaValue = glGetUniformLocation(Program.programID, "alphaValue");
+	if (alphaValue != -1)
+	{
+		glUniform1f(alphaValue, alpha);
+	}
 	remakeMatrix();
 	Matrix modelMatrix = matrix;
 	if (!forward) modelMatrix.Scale(-1.0, 1.0, 0);

@@ -20,7 +20,12 @@ GLuint LoadTexture(const char *filePath) {
 }
 
 // Text drawing
-void DrawText(ShaderProgram *program, int fontTexture, std::string text, float size, float spacing) {
+void DrawText(ShaderProgram *program, int fontTexture, std::string text, float size, float spacing, float alpha) {
+	GLint alphaValue = glGetUniformLocation(program->programID, "alphaValue");
+	if (alphaValue != -1)
+	{
+		glUniform1f(alphaValue, alpha);
+	}
 	float texture_size = 1.0 / 16.0f;
 	std::vector<float> vertexData;
 	std::vector<float> texCoordData;
@@ -59,18 +64,23 @@ void DrawText(ShaderProgram *program, int fontTexture, std::string text, float s
 }
 
 // Draws messages on a given x,y coordinate
-void DrawMessage(ShaderProgram& program, int TextureID, std::string text, float x, float y, float size, float space) {
+void DrawMessage(ShaderProgram& program, int TextureID, std::string text, float x, float y, float size, float space, float alpha) {
 	Matrix modelMatrix;
 	Matrix viewMatrix;
 	modelMatrix.Translate(x,y,0);
 	program.SetModelMatrix(modelMatrix);
 	program.SetViewMatrix(viewMatrix);
-	DrawText(&program, TextureID, text, size, space);
+	DrawText(&program, TextureID, text, size, space, alpha);
 }
 
 //Draw the level starting from an x,y coordinate using a FlareMap, takes in a viewMatrix for a view
-void DrawLevel(ShaderProgram & program, int textureID, FlareMap map, Matrix viewMatrix, float pos_x, float pos_y)
+void DrawLevel(ShaderProgram & program, int textureID, FlareMap map, Matrix viewMatrix, float pos_x, float pos_y, float alpha)
 {
+	GLint alphaValue = glGetUniformLocation(program.programID, "alphaValue");
+	if (alphaValue != -1)
+	{
+		glUniform1f(alphaValue, alpha);
+	}
 	Matrix modelMatrix;
 	modelMatrix.Translate(pos_x, pos_y, 0);
 
@@ -138,6 +148,47 @@ SheetSprite& createSheetSpriteBySpriteIndex(unsigned int textureID, int spriteIn
 float lerp(float v0, float v1, float t)
 {
 	return (1.0 - t)*v0 + t * v1;
+}
+
+float mapValue(float value, float srcMin, float srcMax, float dstMin, float dstMax)
+{
+	float retVal = dstMin + ((value - srcMin) / (srcMax - srcMin) * (dstMax - dstMin));
+	if (retVal < dstMin) {
+		retVal = dstMin;
+	}
+	if (retVal > dstMax) {
+		retVal = dstMax;
+	}
+	return retVal;
+}
+
+float easeIn(float from, float to, float time)
+{
+	float tVal = time * time*time*time*time;
+	return (1.0f - tVal)*from + tVal * to;
+}
+
+float easeOut(float from, float to, float time)
+{
+	float oneMinusT = 1.0f - time;
+	float tVal = 1.0f - (oneMinusT * oneMinusT * oneMinusT *
+		oneMinusT * oneMinusT);
+	return (1.0f - tVal)*from + tVal * to;
+}
+
+float easeInOut(float from, float to, float time)
+{
+	float tVal;
+	if (time > 0.5) {
+		float oneMinusT = 1.0f - ((0.5f - time)*-2.0f);
+		tVal = 1.0f - ((oneMinusT * oneMinusT * oneMinusT * oneMinusT *
+			oneMinusT) * 0.5f);
+	}
+	else {
+		time *= 2.0;
+		tVal = (time*time*time*time*time) / 2.0;
+	}
+	return (1.0f - tVal)*from + tVal * to;
 }
 
 void worldToTileCoordinates(float worldX, float worldY, int *gridX, int *gridY) {

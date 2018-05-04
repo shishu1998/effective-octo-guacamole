@@ -35,7 +35,6 @@ public:
 	int lives = 3;
 	int playerHealth = 3;
 	float invulTime = 0;
-	bool playerBlink = false;
 	std::vector<Entity> healthSprites;
 
 	bool playerHasKey = false;
@@ -45,16 +44,25 @@ public:
 	int doorX, doorY;
 
 	Matrix viewMatrix;
+	float animationElapsed;
 
+	Mix_Music *menuMusic;
+	Mix_Music *L1Music;
+	Mix_Music *L2Music;
+	Mix_Music *L3Music;
+	Mix_Music *victoryMusic;
+	Mix_Music *gameOverMusic;
+	Mix_Music *bgm;
 	Mix_Chunk *ghost;
 	Mix_Chunk *jump;
-	Mix_Music *bgm;
 	Mix_Chunk *keyPickUp;
 	Mix_Chunk *doorLock;
 	Mix_Chunk *doorOpen;
 	Mix_Chunk *splash;
+	Mix_Chunk *lava;
 
 	~GameState();
+
 	void loadResources();
 	FlareMap& chooseMap();
 	void GameState::setExitCoordinates(const FlareMap& map);
@@ -65,13 +73,17 @@ public:
 	void playerDeath();
 	void pickUpKey(int gridY, int gridX);
 	void resetKey();
+
 	void updateGameState(float elapsed);
 	void updateLevel(float elapsed);
 	void processKeys(const Uint8 *keys);
 	void processKeysInLevel(const Uint8 *keys);
 	void processEvents(SDL_Event &event);
+
 	bool checkEntityOutOfBounds(const Entity& other);
 	void PlaceEntity(std::string type, float x, float y);
+
 	void Render(ShaderProgram &program);
+
 	void GameState::playBackgroundMusic() const;
 };

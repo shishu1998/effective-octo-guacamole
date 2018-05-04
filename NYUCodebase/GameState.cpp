@@ -24,12 +24,19 @@ void GameState::loadResources() {
 	
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	bgm = Mix_LoadMUS("Running.mp3");
+	menuMusic = Mix_LoadMUS("MenuMusic.mp3");
+	L1Music = Mix_LoadMUS("Level1.mp3");
+	L2Music = Mix_LoadMUS("Level2.mp3");
+	L3Music = Mix_LoadMUS("Level3.mp3");
+	victoryMusic = Mix_LoadMUS("Victory.mp3");
+	gameOverMusic = Mix_LoadMUS("GameOver.mp3");
 	ghost = Mix_LoadWAV("ghost.wav");
 	jump = Mix_LoadWAV("boing_spring.wav");
 	keyPickUp = Mix_LoadWAV("coin.wav");
 	doorLock = Mix_LoadWAV("doorLock.wav");
 	doorOpen = Mix_LoadWAV("doorOpen.wav");
 	splash = Mix_LoadWAV("splash.wav");
+	lava = Mix_LoadWAV("Lava.wav");
 }
 
 FlareMap & GameState::chooseMap()
@@ -61,6 +68,7 @@ void GameState::setupLevel() {
 	enemies.clear();
 	boxes.clear();
 	platforms.clear();
+	animationElapsed = 0;
 	for (int i = 0; i < map.entities.size(); i++) {
 		PlaceEntity(map.entities[i].type, map.entities[i].x * tileSize, map.entities[i].y * -tileSize);
 	}
@@ -80,31 +88,39 @@ void GameState::goToNextLevel() {
 			setupHealth();
 			setupLevel();
 			glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
+			playBackgroundMusic();
 			break;
 		case Level1:
 			mode = Level2;
 			glClearColor(0.455f, 0.0f, 0.416f, 1.0f);
 			setupLevel();
+			playBackgroundMusic();
 			break;
 		case Level2:
 			mode = Level3;
+			glClearColor(0.043f, 0.29f, 0.494f, 1.0f);
 			setupLevel();
+			playBackgroundMusic();
 			break;
 		case Level3:
 			mode = Victory;
+			playBackgroundMusic();
 			break;
 		case Victory:
 			mode = Menu;
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			playBackgroundMusic();
 			break;
 		case Defeat:
 			mode = Menu;
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			playBackgroundMusic();
 			break;
 		case Instruction:
 			mode = Menu;
 			break;
 	}
+	//playBackgroundMusic();
 }
 
 void GameState::setupHealth()
@@ -117,7 +133,28 @@ void GameState::setupHealth()
 //Plays the background music
 void GameState::playBackgroundMusic() const{
 	Mix_VolumeMusic(20);
-	Mix_PlayMusic(bgm, -1);
+	Mix_HaltMusic();
+	switch (mode) {
+	case Menu:
+	//case Instruction:
+		Mix_PlayMusic(menuMusic, -1);
+		break;
+	case Level1:
+		Mix_PlayMusic(L1Music, -1);
+		break;
+	case Level2:
+		Mix_PlayMusic(L2Music, -1);
+		break;
+	case Level3:
+		Mix_PlayMusic(L3Music, -1);
+		break;
+	case Victory:
+		Mix_PlayMusic(victoryMusic, -1);
+		break;
+	case Defeat:
+		Mix_PlayMusic(gameOverMusic, -1);
+		break;
+	}
 }
 
 //Resets the states of all entities in the GameState
@@ -153,6 +190,7 @@ void GameState::playerDeath() {
 	//player has no lives left; game over
 	if (!lives) {
 		mode = Defeat;
+		playBackgroundMusic();
 	}
 }
 
@@ -193,17 +231,24 @@ void GameState::updateGameState(float elapsed) {
 
 void GameState::updateLevel(float elapsed)
 {
+	animationElapsed += elapsed;
 	std::pair<float, float> penetration;
 	FlareMap& map = chooseMap();
 
 	//Invulnerability update
-	if (invulTime > 0) {
-		playerBlink = !playerBlink;
-		invulTime -= elapsed;
+	invulTime -= elapsed;
+	float playerAlpha;
+	if (invulTime > 0.75) {
+		playerAlpha = mapValue(invulTime, 0.75, 1.5, 0.0, 1.0);
+		player.alpha = easeOut(playerAlpha, 0.0, elapsed);
+	}
+	else if (invulTime > 0.0) {
+		playerAlpha = mapValue(invulTime, 0.75, 0.0, 0.0, 1.0);
+		player.alpha = easeIn(playerAlpha, 1.0, elapsed);
 	}
 	else {
 		invulTime = 0;
-		playerBlink = false;
+		player.alpha = 1.0;
 	}
 	
 	player.Update(elapsed, map.mapData, solidTiles);
@@ -264,13 +309,19 @@ void GameState::updateLevel(float elapsed)
 	}
 	if (playerHealth < 1) playerDeath();
 
-	//Player restarts when touches water/lava
+	//Player restarts when touches water
 	int gridX, gridY;
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
-	if (fluidTiles.find(map.mapData[gridY][gridX]) != fluidTiles.end()) {
+	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
 		playerDeath();
 		Mix_PlayChannel(-1, splash, 0);
 	}
+	//Player restarts when touches lava
+	if (map.mapData[gridY][gridX] == 13 || map.mapData[gridY][gridX] == 42) {
+		playerDeath();
+		Mix_PlayChannel(-1, lava, 0);
+	}
+
 	//Player picks up key on collision
 	if (map.mapData[gridY][gridX] == 14) {
 		pickUpKey(gridY, gridX);
@@ -341,11 +392,13 @@ void GameState::processEvents(SDL_Event &event) {
 		switch (mode) {
 		case Defeat:
 		case Victory:
+			//Back to Menu
 			if (mouseX >= -0.475f && mouseX <= 0.475f && mouseY >= -0.62f && mouseY <= -0.37f) {
 				goToNextLevel();
 			}
 			break;
 		case Menu:
+			//Start Game
 			if (mouseX >= -0.7f && mouseX <= 0.7f && mouseY >= -0.15f && mouseY <= 0.15f) {
 				goToNextLevel();
 			}
@@ -353,18 +406,20 @@ void GameState::processEvents(SDL_Event &event) {
 			else if (mouseX >= -0.85f && mouseX <= 0.85f && mouseY >= -0.62f && mouseY <= -0.37f) {
 				mode = Instruction;
 			}
-			//Exit game
+			//Exit Game
 			else if (mouseX >= -0.625f && mouseX <= 0.625f && mouseY >= -1.15f && mouseY <= -0.85f) {
 				finished = true;
 			}
 			break;
 		case Instruction:
-			if (mouseX >= -0.85f && mouseX <= 0.85f && mouseY >= -1.4f && mouseY <= -1.1f) {
+			//Back to Menu
+			if (mouseX >= -0.85f && mouseX <= 0.85f && mouseY >= -1.75f && mouseY <= -1.45f) {
 				goToNextLevel();
 			}
 			break;
 		}
 	}
+	//R to restart level
 	if (event.type == SDL_KEYDOWN) {
 		switch (mode) {
 		case Level1:
@@ -429,12 +484,13 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 //Draws the game state (tilemap and entities)
 void GameState::Render(ShaderProgram & program)
 {
+	float alpha = easeInOut(0.0, 1.0, animationElapsed*0.4);
 	switch (mode) {
 		case Level1:
 		case Level2:
 		case Level3:
-			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0);
-			if(!playerBlink) player.Render(program, viewMatrix);
+			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0, alpha);
+			player.Render(program, viewMatrix);
 			for (int i = 0; i < enemies.size(); ++i) {
 				enemies[i].Render(program, viewMatrix);
 			}
@@ -451,30 +507,31 @@ void GameState::Render(ShaderProgram & program)
 		case Victory:
 			viewMatrix.Identity();
 			glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
-			DrawMessage(program, fontTextureID, "VICTORY", -0.375f, 0.0f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "VICTORY", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
 			break;
 		case Defeat:
 			viewMatrix.Identity();
 			glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
-			DrawMessage(program, fontTextureID, "git gud", -0.375f, 0.0f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "git gud", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
 			break;
 		case Menu:
 			viewMatrix.Identity();
 			glClearColor(0.0, 0.0, 0.0, 1.0f);
-			DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f);
-			DrawMessage(program, fontTextureID, "Start Game", -0.6f, 0.0, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Exit Game", -0.525f, -1.0, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Start Game", -0.6f, 0.0, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Exit Game", -0.525f, -1.0, 0.3f, -0.15f, 1.0f);
 			break;
 		case Instruction:
 			viewMatrix.Identity();
 			glClearColor(0.0, 0.0f, 0.0f, 1.0f);
-			DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f);
-			DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.0f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.5f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -1.25f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.2f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.3f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "R : Restart Level", -1.125f, -0.8f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -1.6f, 0.3f, -0.15f, 1.0f);
 			break;
 		}
 }

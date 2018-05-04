@@ -53,6 +53,7 @@ public:
 	Vector4 originalVelocity;
 	Vector4 acceleration;
 	Vector4 originalAcceleration;
+	float alpha = 1.0;
 	float Rotation = 0;
 
 	bool isStatic;
