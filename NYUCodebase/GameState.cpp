@@ -98,6 +98,7 @@ void GameState::goToNextLevel() {
 			break;
 		case Level2:
 			mode = Level3;
+			glClearColor(0.043f, 0.29f, 0.494f, 1.0f);
 			setupLevel();
 			playBackgroundMusic();
 			break;
@@ -311,12 +312,12 @@ void GameState::updateLevel(float elapsed)
 	//Player restarts when touches water
 	int gridX, gridY;
 	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
-	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 13) {
+	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
 		playerDeath();
 		Mix_PlayChannel(-1, splash, 0);
 	}
 	//Player restarts when touches lava
-	if (map.mapData[gridY][gridX] == 40 || map.mapData[gridY][gridX] == 42) {
+	if (map.mapData[gridY][gridX] == 13 || map.mapData[gridY][gridX] == 42) {
 		playerDeath();
 		Mix_PlayChannel(-1, lava, 0);
 	}
