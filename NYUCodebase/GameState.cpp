@@ -408,6 +408,11 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 		box.setResetProperties();
 		boxes.emplace_back(box);
 	}
+	else if (type == "Ice") {
+		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 491, tileSize) }), Box, false);
+		box.setResetProperties();
+		boxes.emplace_back(box);
+	}
 }
 
 //Draws the game state (tilemap and entities)
