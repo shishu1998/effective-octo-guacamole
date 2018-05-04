@@ -5,8 +5,8 @@ varying vec2 texCoordVar;
 
 void main() {
 	vec4 texture = texture2D(diffuse, texCoordVar);
-	texture.w = alphaValue;
-	if(texture.rgb == vec3(0.0,0.0,0.0))
+	if(texture.w == 0)
 		discard;
+	texture.w = alphaValue;
     gl_FragColor = texture;
 }
