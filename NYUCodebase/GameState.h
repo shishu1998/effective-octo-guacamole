@@ -56,6 +56,7 @@ public:
 	Mix_Chunk *splash;
 
 	~GameState();
+
 	void loadResources();
 	FlareMap& chooseMap();
 	void GameState::setExitCoordinates(const FlareMap& map);
@@ -66,13 +67,17 @@ public:
 	void playerDeath();
 	void pickUpKey(int gridY, int gridX);
 	void resetKey();
+
 	void updateGameState(float elapsed);
 	void updateLevel(float elapsed);
 	void processKeys(const Uint8 *keys);
 	void processKeysInLevel(const Uint8 *keys);
 	void processEvents(SDL_Event &event);
+
 	bool checkEntityOutOfBounds(const Entity& other);
 	void PlaceEntity(std::string type, float x, float y);
+
 	void Render(ShaderProgram &program);
+
 	void GameState::playBackgroundMusic() const;
 };

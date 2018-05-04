@@ -25,7 +25,14 @@ GLuint LoadTexture(const char *filePath);
 void DrawText(ShaderProgram *program, int fontTexture, std::string text, float size, float spacing);
 void DrawMessage(ShaderProgram& program, int TextureID, std::string text, float x, float y, float size, float space);
 void DrawLevel(ShaderProgram& program, int textureID, FlareMap map, Matrix viewMatrix, float pos_x, float pos_y);
+
 SheetSprite& createSheetSprite(unsigned int textureID, float x, float y, float width, float height, float size);
 SheetSprite& createSheetSpriteBySpriteIndex(unsigned int textureID, int spriteIndex, float size);
+
 float lerp(float v0, float v1, float t);
+float mapValue(float value, float srcMin, float srcMax, float dstMin, float dstMax);
+float easeIn(float from, float to, float time);
+float easeOut(float from, float to, float time);
+float easeInOut(float from, float to, float time);
+
 void worldToTileCoordinates(float worldX, float worldY, int *gridX, int *gridY);

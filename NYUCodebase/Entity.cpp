@@ -176,6 +176,11 @@ void Entity::Update(float elapsed, const std::vector<std::vector<unsigned int>>&
 		// Apply static friction if dropping down a wall
 		if(collidedLeft || collidedRight)
 			velocity.y = lerp(velocity.y, 0.0f, elapsed * Friction_Y);
+		//Only squash and stretch when regular jumping
+		else {
+			size.y = mapValue(fabs(velocity.y), 0.0, 5.0, 0.25, 0.3);
+			size.x = mapValue(fabs(velocity.y), 5.0, 0.0, 0.2, 0.25);
+		}
 		UpdateAnimation(elapsed);
 	}
 }
