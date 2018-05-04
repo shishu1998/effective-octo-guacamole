@@ -193,17 +193,17 @@ void GameState::updateGameState(float elapsed) {
 
 void GameState::updateLevel(float elapsed)
 {
+	animationElapsed += elapsed;
 	std::pair<float, float> penetration;
 	FlareMap& map = chooseMap();
 
 	//Invulnerability update
 	if (invulTime > 0) {
-		playerBlink = !playerBlink;
 		invulTime -= elapsed;
 	}
 	else {
 		invulTime = 0;
-		playerBlink = false;
+		player.alpha = 1.0;
 	}
 	
 	player.Update(elapsed, map.mapData, solidTiles);
@@ -413,12 +413,13 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 //Draws the game state (tilemap and entities)
 void GameState::Render(ShaderProgram & program)
 {
+	float alpha = easeInOut(0.0, 1.0, animationElapsed*0.4);
 	switch (mode) {
 		case Level1:
 		case Level2:
 		case Level3:
-			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0);
-			if(!playerBlink) player.Render(program, viewMatrix);
+			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0, alpha);
+			player.Render(program, viewMatrix);
 			for (int i = 0; i < enemies.size(); ++i) {
 				enemies[i].Render(program, viewMatrix);
 			}
@@ -435,30 +436,30 @@ void GameState::Render(ShaderProgram & program)
 		case Victory:
 			viewMatrix.Identity();
 			glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
-			DrawMessage(program, fontTextureID, "VICTORY", -0.375f, 0.0f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "VICTORY", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
 			break;
 		case Defeat:
 			viewMatrix.Identity();
 			glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
-			DrawMessage(program, fontTextureID, "git gud", -0.375f, 0.0f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "git gud", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
 			break;
 		case Menu:
 			viewMatrix.Identity();
 			glClearColor(0.0, 0.0, 0.0, 1.0f);
-			DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f);
-			DrawMessage(program, fontTextureID, "Start game", -0.6f, 0.0, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Exit game", -0.525f, -1.0, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Start game", -0.6f, 0.0, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Exit game", -0.525f, -1.0, 0.3f, -0.15f, 1.0f);
 			break;
 		case Instruction:
 			viewMatrix.Identity();
 			glClearColor(0.0, 0.0f, 0.0f, 1.0f);
-			DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f);
-			DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.0f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.5f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -1.25f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.0f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -1.25f, 0.3f, -0.15f, 1.0f);
 			break;
 		}
 }

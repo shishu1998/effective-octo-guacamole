@@ -36,7 +36,6 @@ public:
 	int lives = 3;
 	int playerHealth = 3;
 	float invulTime = 0;
-	bool playerBlink = false;
 	std::vector<Entity> healthSprites;
 
 	bool playerHasKey = false;
@@ -46,6 +45,7 @@ public:
 	int doorX, doorY;
 
 	Matrix viewMatrix;
+	float animationElapsed;
 
 	Mix_Chunk *ghost;
 	Mix_Chunk *jump;
