@@ -441,21 +441,21 @@ void GameState::Render(ShaderProgram & program)
 			viewMatrix.Identity();
 			glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
 			DrawMessage(program, fontTextureID, "VICTORY", -0.375f, 0.0f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f);
 			break;
 		case Defeat:
 			viewMatrix.Identity();
 			glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
 			DrawMessage(program, fontTextureID, "git gud", -0.375f, 0.0f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f);
 			break;
 		case Menu:
 			viewMatrix.Identity();
 			glClearColor(0.0, 0.0, 0.0, 1.0f);
 			DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f);
-			DrawMessage(program, fontTextureID, "Start game", -0.6f, 0.0, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Start Game", -0.6f, 0.0, 0.3f, -0.15f);
 			DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Exit game", -0.525f, -1.0, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Exit Game", -0.525f, -1.0, 0.3f, -0.15f);
 			break;
 		case Instruction:
 			viewMatrix.Identity();
@@ -463,7 +463,7 @@ void GameState::Render(ShaderProgram & program)
 			DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f);
 			DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.0f, 0.3f, -0.15f);
 			DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.5f, 0.3f, -0.15f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -1.25f, 0.3f, -0.15f);
+			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -1.25f, 0.3f, -0.15f);
 			break;
 		}
 }

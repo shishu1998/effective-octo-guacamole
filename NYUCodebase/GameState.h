@@ -4,9 +4,8 @@
 #include <vector>
 #include <SDL.h>
 #include <SDL_mixer.h>
-//#define level1FILE "map01.txt"
-#define level1FILE "map02.txt"
-#define level2FILE "map03.txt"
+#define level1FILE "mapA.txt"
+#define level2FILE "mapB.txt"
 #define level3FILE "mapC.txt"
 #define Solids {62, 63, 64, 65, 92, 95, 121, 122, 123, 124, 125, 130, 152, 155, 162, 182, 183, 184, 185, 212, 215, 222}
 #define Fluids {11, 40, 13, 42}
