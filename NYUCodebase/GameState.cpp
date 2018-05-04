@@ -68,6 +68,7 @@ void GameState::setupLevel() {
 	enemies.clear();
 	boxes.clear();
 	platforms.clear();
+	animationElapsed = 0;
 	for (int i = 0; i < map.entities.size(); i++) {
 		PlaceEntity(map.entities[i].type, map.entities[i].x * tileSize, map.entities[i].y * -tileSize);
 	}
@@ -234,8 +235,15 @@ void GameState::updateLevel(float elapsed)
 	FlareMap& map = chooseMap();
 
 	//Invulnerability update
-	if (invulTime > 0) {
-		invulTime -= elapsed;
+	invulTime -= elapsed;
+	float playerAlpha;
+	if (invulTime > 0.75) {
+		playerAlpha = mapValue(invulTime, 0.75, 1.5, 0.0, 1.0);
+		player.alpha = easeOut(playerAlpha, 0.0, elapsed);
+	}
+	else if (invulTime > 0.0) {
+		playerAlpha = mapValue(invulTime, 0.75, 0.0, 0.0, 1.0);
+		player.alpha = easeIn(playerAlpha, 1.0, elapsed);
 	}
 	else {
 		invulTime = 0;
