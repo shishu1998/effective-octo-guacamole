@@ -365,6 +365,17 @@ void GameState::processEvents(SDL_Event &event) {
 			break;
 		}
 	}
+	if (event.type == SDL_KEYDOWN) {
+		switch (mode) {
+		case Level1:
+		case Level2:
+		case Level3:
+			if (event.key.keysym.scancode == SDL_SCANCODE_R) {
+				playerDeath();
+			}
+			break;
+		}
+	}
 }
 
 //Checks if an entity fell out of the map
