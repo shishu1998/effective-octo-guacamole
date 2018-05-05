@@ -392,11 +392,13 @@ void GameState::processEvents(SDL_Event &event) {
 		switch (mode) {
 		case Defeat:
 		case Victory:
+			//Back to Menu
 			if (mouseX >= -0.475f && mouseX <= 0.475f && mouseY >= -0.62f && mouseY <= -0.37f) {
 				goToNextLevel();
 			}
 			break;
 		case Menu:
+			//Start Game
 			if (mouseX >= -0.7f && mouseX <= 0.7f && mouseY >= -0.15f && mouseY <= 0.15f) {
 				goToNextLevel();
 			}
@@ -404,14 +406,27 @@ void GameState::processEvents(SDL_Event &event) {
 			else if (mouseX >= -0.85f && mouseX <= 0.85f && mouseY >= -0.62f && mouseY <= -0.37f) {
 				mode = Instruction;
 			}
-			//Exit game
+			//Exit Game
 			else if (mouseX >= -0.625f && mouseX <= 0.625f && mouseY >= -1.15f && mouseY <= -0.85f) {
 				finished = true;
 			}
 			break;
 		case Instruction:
-			if (mouseX >= -0.85f && mouseX <= 0.85f && mouseY >= -1.4f && mouseY <= -1.1f) {
+			//Back to Menu
+			if (mouseX >= -0.85f && mouseX <= 0.85f && mouseY >= -1.75f && mouseY <= -1.45f) {
 				goToNextLevel();
+			}
+			break;
+		}
+	}
+	//R to restart level
+	if (event.type == SDL_KEYDOWN) {
+		switch (mode) {
+		case Level1:
+		case Level2:
+		case Level3:
+			if (event.key.keysym.scancode == SDL_SCANCODE_R) {
+				playerDeath();
 			}
 			break;
 		}
@@ -493,29 +508,30 @@ void GameState::Render(ShaderProgram & program)
 			viewMatrix.Identity();
 			glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
 			DrawMessage(program, fontTextureID, "VICTORY", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
 			break;
 		case Defeat:
 			viewMatrix.Identity();
 			glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
 			DrawMessage(program, fontTextureID, "git gud", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
 			break;
 		case Menu:
 			viewMatrix.Identity();
 			glClearColor(0.0, 0.0, 0.0, 1.0f);
 			DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Start game", -0.6f, 0.0, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Start Game", -0.6f, 0.0, 0.3f, -0.15f, 1.0f);
 			DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Exit game", -0.525f, -1.0, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Exit Game", -0.525f, -1.0, 0.3f, -0.15f, 1.0f);
 			break;
 		case Instruction:
 			viewMatrix.Identity();
 			glClearColor(0.0, 0.0f, 0.0f, 1.0f);
 			DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.0f, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Back to menu", -0.75f, -1.25f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.2f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.3f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "R : Restart Level", -1.125f, -0.8f, 0.3f, -0.15f, 1.0f);
+			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -1.6f, 0.3f, -0.15f, 1.0f);
 			break;
 		}
 }
