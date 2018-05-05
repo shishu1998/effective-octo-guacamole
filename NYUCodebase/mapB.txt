@@ -71,3 +71,13 @@ location=4,7,1,1
 type=Player
 location=7,20,1,1
 
+[ObjectsLayer]
+# enemy2
+type=Enemy
+location=31,20,1,1
+
+[ObjectsLayer]
+# enemy3
+type=Enemy
+location=56,20,1,1
+
