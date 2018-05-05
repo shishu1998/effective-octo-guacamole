@@ -9,9 +9,9 @@ MovingPlatform::MovingPlatform(int TextureID, float x, float y, int numBlocks)
 	}
 }
 
-void MovingPlatform::Render(ShaderProgram & Program, Matrix viewMatrix) {
+void MovingPlatform::Render(ShaderProgram & Program, Matrix viewMatrix, float alpha) {
 	for (int i = 0; i < blocks.size(); ++i) {
-		blocks[i].Render(Program, viewMatrix);
+		blocks[i].Render(Program, viewMatrix, alpha);
 	}
 }
 

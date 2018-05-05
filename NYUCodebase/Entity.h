@@ -16,7 +16,7 @@ public:
 	Entity(float x, float y, float width, float height, bool isStatic);
 	Entity(float x, float y, std::vector<SheetSprite> sprites, EntityType type, bool isStatic);
 	void UntexturedDraw(ShaderProgram & Program);
-	void Render(ShaderProgram &Program, Matrix viewMatrix);
+	void Render(ShaderProgram &Program, Matrix viewMatrix, float fadeAlpha);
 	void ResetContactFlags();
 	bool CollidesWith(const Entity& Other);
 	float TileCollideLeft(int tileX);

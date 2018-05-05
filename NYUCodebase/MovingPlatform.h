@@ -10,7 +10,7 @@ public:
 	Vector4 acceleration;
 	Vector4 originalAcceleration;
 	MovingPlatform(int TextureID, float x, float y, int numBlocks);
-	void MovingPlatform::Render(ShaderProgram & Program, Matrix viewMatrix);
+	void MovingPlatform::Render(ShaderProgram & Program, Matrix viewMatrix, float alpha);
 	void MovingPlatform::Update(float elapsed, const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids, Entity& player);
 	bool MovingPlatform::CollidesWith(Entity& other);
 	void setResetProperties();

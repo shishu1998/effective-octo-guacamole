@@ -29,13 +29,17 @@ void Entity::UntexturedDraw(ShaderProgram & Program) {
 	glDisableVertexAttribArray(Program.positionAttribute);
 }
 
-void Entity::Render(ShaderProgram & Program, Matrix viewMatrix)
+void Entity::Render(ShaderProgram & Program, Matrix viewMatrix, float fadeAlpha)
 {
-
 	GLint alphaValue = glGetUniformLocation(Program.programID, "alphaValue");
 	if (alphaValue != -1)
 	{
-		glUniform1f(alphaValue, alpha);
+		if (fadeAlpha <= 1.0f) {
+			glUniform1f(alphaValue, fadeAlpha);
+		}
+		else {
+			glUniform1f(alphaValue, alpha);
+		}
 	}
 	remakeMatrix();
 	Matrix modelMatrix = matrix;
