@@ -491,6 +491,7 @@ void GameState::Render(ShaderProgram & program)
 		case Level2:
 		case Level3:
 			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0, alpha);
+			player.alpha = alpha;
 			player.Render(program, viewMatrix);
 			for (int i = 0; i < enemies.size(); ++i) {
 				enemies[i].alpha = alpha;
