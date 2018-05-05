@@ -269,16 +269,13 @@ bool Entity::canJumpLeft(const std::vector<std::vector<unsigned int>>& mapData, 
 	int gridX, gridY;
 	worldToTileCoordinates(Position.x, Position.y, &gridX, &gridY);
 
+	float canJumpLeft = false;
 	// Checks if we're going to the left
 	if (velocity.x < 0) {
-		for (int i = 1; i < 3; ++i) {
-			if ((solids.find(mapData[gridY - i][gridX - 2]) != solids.end())) {
-				return true;
-			}
-		}
+		//If there's an obstacle in front, you can jump over it if it's shorter than 2 tiles high
+		canJumpLeft = (solids.find(mapData[gridY][gridX - 2]) != solids.end() || solids.find(mapData[gridY - 1][gridX - 2]) != solids.end()) && solids.find(mapData[gridY - 2][gridX - 2]) == solids.end();
 	}
-
-	return false;
+	return canJumpLeft;
 }
 
 // Checks if the entity can jump to a tile on the right
@@ -287,16 +284,13 @@ bool Entity::canJumpRight(const std::vector<std::vector<unsigned int>>& mapData,
 	int gridX, gridY;
 	worldToTileCoordinates(Position.x, Position.y, &gridX, &gridY);
 
+	float canJumpRight = false;
 	// Checks if we're going to the right
 	if (velocity.x > 0) {
-		for (int i = 1; i < 3; ++i) {
-			if ((solids.find(mapData[gridY - i][gridX + 2]) != solids.end())) {
-				return true;
-			}
-		}
+		//If there's an obstacle in front, you can jump over it if it's shorter than 2 tiles high
+		canJumpRight = (solids.find(mapData[gridY][gridX + 2]) != solids.end() || solids.find(mapData[gridY - 1][gridX + 2]) != solids.end()) && solids.find(mapData[gridY - 2][gridX + 2]) == solids.end();
 	}
-
-	return false;
+	return canJumpRight;
 }
 
 //Set the current state of the entity to the properties that we will reset to
