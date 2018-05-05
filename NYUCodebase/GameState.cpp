@@ -491,7 +491,9 @@ void GameState::Render(ShaderProgram & program)
 		case Level2:
 		case Level3:
 			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0, alpha);
-			player.alpha = alpha;
+			if (alpha < 1) {
+				player.alpha = alpha;
+			}
 			player.Render(program, viewMatrix);
 			for (int i = 0; i < enemies.size(); ++i) {
 				enemies[i].alpha = alpha;
@@ -502,6 +504,9 @@ void GameState::Render(ShaderProgram & program)
 				boxes[i].Render(program, viewMatrix);
 			}
 			for (int i = 0; i < platforms.size(); ++i) {
+				for (int j = 0; j < platforms[i].blocks.size(); ++j) {
+					platforms[i].blocks[j].alpha = alpha;
+				}
 				platforms[i].Render(program, viewMatrix);
 			}
 			for (int i = 0; i < healthSprites.size(); ++i) {
