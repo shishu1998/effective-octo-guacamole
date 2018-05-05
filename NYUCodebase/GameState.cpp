@@ -484,8 +484,8 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 //Draws the game state (tilemap and entities)
 void GameState::Render(ShaderProgram & program)
 {
-	animationElapsed > 1 ? 1 : animationElapsed;
 	float alpha = easeInOut(0.0, 1.0, animationElapsed*0.4);
+	alpha = alpha > 1 ? 1 : alpha;
 	switch (mode) {
 		case Level1:
 		case Level2:
