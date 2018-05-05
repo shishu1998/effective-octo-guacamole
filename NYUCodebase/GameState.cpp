@@ -485,22 +485,32 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 void GameState::Render(ShaderProgram & program)
 {
 	float alpha = easeInOut(0.0, 1.0, animationElapsed*0.4);
+	alpha = alpha > 1 ? 1 : alpha;
 	switch (mode) {
 		case Level1:
 		case Level2:
 		case Level3:
 			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0, alpha);
+			if (alpha < 1) {
+				player.alpha = alpha;
+			}
 			player.Render(program, viewMatrix);
 			for (int i = 0; i < enemies.size(); ++i) {
+				enemies[i].alpha = alpha;
 				enemies[i].Render(program, viewMatrix);
 			}
 			for (int i = 0; i < boxes.size(); ++i) {
+				boxes[i].alpha = alpha;
 				boxes[i].Render(program, viewMatrix);
 			}
 			for (int i = 0; i < platforms.size(); ++i) {
+				for (int j = 0; j < platforms[i].blocks.size(); ++j) {
+					platforms[i].blocks[j].alpha = alpha;
+				}
 				platforms[i].Render(program, viewMatrix);
 			}
 			for (int i = 0; i < healthSprites.size(); ++i) {
+				healthSprites[i].alpha = alpha;
 				healthSprites[i].Render(program, viewMatrix);
 			}
 			break;

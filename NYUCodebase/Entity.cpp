@@ -31,7 +31,6 @@ void Entity::UntexturedDraw(ShaderProgram & Program) {
 
 void Entity::Render(ShaderProgram & Program, Matrix viewMatrix)
 {
-
 	GLint alphaValue = glGetUniformLocation(Program.programID, "alphaValue");
 	if (alphaValue != -1)
 	{
