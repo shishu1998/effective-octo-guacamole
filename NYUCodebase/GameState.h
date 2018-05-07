@@ -27,6 +27,7 @@ public:
 	std::unordered_set<int> solidTiles;
 	std::unordered_set<int> fluidTiles;
 	Entity player;
+	Entity playerLife;
 
 	// Emulates keydown event, keys is faster than polling
 	bool canJump = true;
@@ -35,6 +36,7 @@ public:
 	int lives = 3;
 	int playerHealth = 3;
 	float invulTime = 0;
+	bool playerHasDied = false;
 	std::vector<Entity> healthSprites;
 
 	bool playerHasKey = false;
