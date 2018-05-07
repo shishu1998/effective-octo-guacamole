@@ -234,7 +234,8 @@ void GameState::updateGameState(float elapsed) {
 void GameState::updateLevel(float elapsed)
 {
 	animationElapsed += elapsed;
-	if (animationElapsed > 2.0) {
+	//We don't want players to move + do anything until everything's rendered
+	if (animationElapsed > 2.5) {
 		std::pair<float, float> penetration;
 		FlareMap& map = chooseMap();
 
@@ -301,13 +302,11 @@ void GameState::updateLevel(float elapsed)
 
 		//Player loses health when touches an enemy
 		for (int i = 0; i < enemies.size(); ++i) {
-			if (invulTime <= 0) {
-				if (player.SATCollidesWith(enemies[i], penetration)) {
-					playerHealth -= 1;
-					healthSprites[playerHealth].spriteIndex += 1;
-					invulTime = 1.5;
-					Mix_PlayChannel(-1, ghost, 0);
-				}
+			if (invulTime <= 0 && player.SATCollidesWith(enemies[i], penetration)) {
+				playerHealth -= 1;
+				healthSprites[playerHealth].spriteIndex += 1;
+				invulTime = 1.5;
+				Mix_PlayChannel(-1, ghost, 0);
 			}
 		}
 		if (playerHealth < 1) playerDeath();
