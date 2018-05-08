@@ -123,3 +123,8 @@ location=14,70,1,1
 type=Ice
 location=21,26,1,1
 
+[ObjectsLayer]
+# mushroomTile
+type=MushroomTile
+location=11,69,0,0
+

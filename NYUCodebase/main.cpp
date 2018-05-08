@@ -42,7 +42,7 @@ void init() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	projectionMatrix.SetOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
 	program.SetProjectionMatrix(projectionMatrix);
-	glUseProgram(program.programID);
+	invertProgram.SetProjectionMatrix(projectionMatrix);
 	glClearColor(0.553, 0.765, 0.855, 0.0);
 
 	state.loadResources();

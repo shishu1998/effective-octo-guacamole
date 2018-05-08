@@ -81,3 +81,8 @@ location=31,20,1,1
 type=Enemy
 location=56,20,1,1
 
+[ObjectsLayer]
+# mushroomTile
+type=MushroomTile
+location=34,13,0,0
+

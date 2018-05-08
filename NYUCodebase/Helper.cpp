@@ -21,6 +21,7 @@ GLuint LoadTexture(const char *filePath) {
 
 // Text drawing
 void DrawText(ShaderProgram *program, int fontTexture, std::string text, float size, float spacing, float alpha) {
+	glUseProgram(program->programID);
 	GLint alphaValue = glGetUniformLocation(program->programID, "alphaValue");
 	if (alphaValue != -1)
 	{

@@ -46,8 +46,8 @@ public:
 	//stores the coordinates of the exit
 	int doorX, doorY;
 	// Mushroom Stuff
-	Entity* mushroomTile;
-	Entity* mushroom;
+	Entity mushroomTile;
+	Entity mushroom;
 	float mushroomElapsed = 0;
 
 	Matrix viewMatrix;

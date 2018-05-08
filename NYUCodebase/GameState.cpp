@@ -76,6 +76,7 @@ void GameState::setupLevel() {
 
 void GameState::goToNextLevel() {
 	playerHasDied = false;
+	playerIsHigh = false;
 	switch (mode) {
 		case Menu:
 			//Resets the player's lives and hp after every playthrough
@@ -95,10 +96,6 @@ void GameState::goToNextLevel() {
 			glClearColor(0.455f, 0.0f, 0.416f, 1.0f);
 			setupLevel();
 			playBackgroundMusic();
-			delete mushroomTile;
-			mushroomTile = NULL;
-			delete mushroom;
-			mushroom = NULL;
 			break;
 		case Level2:
 			mode = Level3;
@@ -124,7 +121,6 @@ void GameState::goToNextLevel() {
 			mode = Menu;
 			break;
 	}
-	//playBackgroundMusic();
 }
 
 void GameState::setupHealth()
@@ -178,11 +174,9 @@ void GameState::resetEntities()
 	for (int i = 0; i < healthSprites.size(); ++i) {
 		healthSprites[i].reset();
 	}
-	if (mushroomTile) mushroomTile->reset();
-	if (mushroom) {
-		mushroom->reset();
-		mushroom->alpha = 0.0f;
-	}
+	mushroomTile.reset();
+	mushroom.reset();
+	mushroom.alpha = 0.0f;
 }
 
 //Resets players and entities upon death
@@ -307,10 +301,10 @@ void GameState::updateLevel(float elapsed)
 		}
 
 		//Player collision with MushroomTile
-		if (player.SATCollidesWith(*mushroomTile, penetration) && penetration.second != 0.0f) {
+		if (player.SATCollidesWith(mushroomTile, penetration) && penetration.second != 0.0f) {
 			if (penetration.second < 0.0f) {
-				mushroomTile->spriteIndex = 1;
-				mushroom->alpha = 1.0f;
+				mushroomTile.spriteIndex = 1;
+				mushroom.alpha = 1.0f;
 				mushroomElapsed += elapsed;
 				player.velocity.y = 0.0f;
 			}
@@ -324,13 +318,20 @@ void GameState::updateLevel(float elapsed)
 		if (mushroomElapsed > 0.0f) {
 			float displacementY = easeOut(mushroomElapsed*0.4, 0.0, tileSize/2);
 			displacementY = displacementY > tileSize/2 ? tileSize/2 : displacementY;
-			mushroom->Position.y = mushroom->originalPosition.y + displacementY;
+			mushroom.Position.y = mushroom.originalPosition.y + displacementY;
 			mushroomElapsed += elapsed;
 		}
 
 		//If player eats a mushroom
-		if (mushroom->alpha != 0 && player.SATCollidesWith(*mushroom, penetration)) {
-			playerIsHigh = true;
+		if (mushroom.alpha != 0 && player.SATCollidesWith(mushroom, penetration)) {
+			//50-50 chance of getting high or dying
+			if (rand() % 2) {
+				playerIsHigh = true;
+				mushroom.alpha = 0.0f;
+			}
+			else {
+				playerDeath();
+			}
 		}
 
 		//Platform update, also resolves platform player collision + movement
@@ -521,11 +522,11 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 		boxes.emplace_back(box);
 	}
 	else if (type == "MushroomTile") {
-		mushroomTile = new Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 130, tileSize), createSheetSpriteBySpriteIndex(TextureID, 160, tileSize) }), Box, true);
-		mushroomTile->setResetProperties();
-		mushroom = new Entity(x, y+0.1, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 108, tileSize) }), Mushroom, true);
-		mushroom->alpha = 0.0f;
-		mushroom->setResetProperties();
+		mushroomTile = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 130, tileSize), createSheetSpriteBySpriteIndex(TextureID, 160, tileSize) }), Box, true);
+		mushroomTile.setResetProperties();
+		mushroom = Entity(x, y+0.1, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 108, tileSize) }), Mushroom, true);
+		mushroom.alpha = 0.0f;
+		mushroom.setResetProperties();
 	}
 }
 
@@ -581,8 +582,8 @@ void GameState::Render(ShaderProgram & program)
 				healthSprites[i].alpha = alpha;
 				healthSprites[i].Render(program, viewMatrix);
 			}
-			if (mushroom) mushroom->Render(program, viewMatrix);
-			if(mushroomTile) mushroomTile->Render(program, viewMatrix);
+			mushroom.Render(program, viewMatrix);
+			mushroomTile.Render(program, viewMatrix);
 		}
 		break;
 	case Victory:
@@ -627,6 +628,4 @@ GameState::~GameState() {
 	Mix_FreeChunk(doorOpen);
 	Mix_FreeChunk(splash);
 	Mix_CloseAudio();
-	delete mushroom;
-	delete mushroomTile;
 }
