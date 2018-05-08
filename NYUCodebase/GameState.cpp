@@ -16,11 +16,10 @@ void GameState::loadResources() {
 		health.setResetProperties();
 		healthSprites.emplace_back(health);
 	}
+	playerLife = Entity(-0.3, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize)}), Life, false);
 
 	solidTiles = std::unordered_set<int>(Solids);
 	fluidTiles = std::unordered_set<int>(Fluids);
-	
-	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
 	
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	bgm = Mix_LoadMUS("Running.mp3");
@@ -76,6 +75,7 @@ void GameState::setupLevel() {
 }
 
 void GameState::goToNextLevel() {
+	playerHasDied = false;
 	switch (mode) {
 		case Menu:
 			//Resets the player's lives and hp after every playthrough
@@ -180,6 +180,8 @@ void GameState::resetEntities()
 void GameState::playerDeath() {
 	playerHealth = 3;
 	invulTime = 0;
+	animationElapsed = 0;
+	playerHasDied = true;
 	resetEntities();
 	FlareMap& map = chooseMap();
 	//put the key back and lock the door if the player already has a key
@@ -232,103 +234,104 @@ void GameState::updateGameState(float elapsed) {
 void GameState::updateLevel(float elapsed)
 {
 	animationElapsed += elapsed;
-	std::pair<float, float> penetration;
-	FlareMap& map = chooseMap();
+	//We don't want players to move + do anything until everything's rendered
+	if (animationElapsed > 2.5) {
+		std::pair<float, float> penetration;
+		FlareMap& map = chooseMap();
 
-	//Invulnerability update
-	invulTime -= elapsed;
-	float playerAlpha;
-	if (invulTime > 0.75) {
-		playerAlpha = mapValue(invulTime, 0.75, 1.5, 0.0, 1.0);
-		player.alpha = easeOut(playerAlpha, 0.0, elapsed);
-	}
-	else if (invulTime > 0.0) {
-		playerAlpha = mapValue(invulTime, 0.75, 0.0, 0.0, 1.0);
-		player.alpha = easeIn(playerAlpha, 1.0, elapsed);
-	}
-	else {
-		invulTime = 0;
-		player.alpha = 1.0;
-	}
-	
-	player.Update(elapsed, map.mapData, solidTiles);
-	//This shouldn't ever happen, but just in case
-	if (checkEntityOutOfBounds(player)) player.reset();
-	for (int i = 0; i < enemies.size(); ++i) {
-		enemies[i].Update(elapsed, map.mapData, solidTiles);
-		//Enemy jumps if possible 
-		if ((enemies[i].canJumpLeft(map.mapData, solidTiles) || enemies[i].canJumpRight(map.mapData, solidTiles)) && enemies[i].collidedBottom) {
-			enemies[i].velocity.y = 2.5;
+		//Invulnerability update
+		invulTime -= elapsed;
+		float playerAlpha;
+		if (invulTime > 0.75) {
+			playerAlpha = mapValue(invulTime, 0.75, 1.5, 0.0, 1.0);
+			player.alpha = easeOut(playerAlpha, 0.0, elapsed);
 		}
-		//Reverses the movement of NPCs if there is collision against tiles or if they can't drop down
-		if (enemies[i].collidedLeft || !enemies[i].canDropDownLeft(map.mapData, solidTiles)) {
-			enemies[i].acceleration.x = 0.5;
-			enemies[i].forward = false;
+		else if (invulTime > 0.0) {
+			playerAlpha = mapValue(invulTime, 0.75, 0.0, 0.0, 1.0);
+			player.alpha = easeIn(playerAlpha, 1.0, elapsed);
 		}
-		if (enemies[i].collidedRight || !enemies[i].canDropDownRight(map.mapData, solidTiles)) {
-			enemies[i].acceleration.x = -0.5;
-			enemies[i].forward = true;
+		else {
+			invulTime = 0;
+			player.alpha = 1.0;
 		}
-		//Enemies respawn if goes out of bounds
-		if (checkEntityOutOfBounds(enemies[i])) enemies[i].reset();
-	}
 
-	//Boxes falling(possibly) update
-	for (int i = 0; i < boxes.size(); ++i) {
-		boxes[i].Update(elapsed, map.mapData, solidTiles);
-
-		//Player Collision with Box
-		player.SATCollidesWith(boxes[i], penetration);
-		if (penetration.second > 0 && player.velocity.y < 0){
-			player.velocity.y = 0;
-			player.collidedBottom = true;
+		player.Update(elapsed, map.mapData, solidTiles);
+		//This shouldn't ever happen, but just in case
+		if (checkEntityOutOfBounds(player)) player.reset();
+		for (int i = 0; i < enemies.size(); ++i) {
+			enemies[i].Update(elapsed, map.mapData, solidTiles);
+			//Enemy jumps if possible 
+			if ((enemies[i].canJumpLeft(map.mapData, solidTiles) || enemies[i].canJumpRight(map.mapData, solidTiles)) && enemies[i].collidedBottom) {
+				enemies[i].velocity.y = 2.5;
+			}
+			//Reverses the movement of NPCs if there is collision against tiles or if they can't drop down
+			if (enemies[i].collidedLeft || !enemies[i].canDropDownLeft(map.mapData, solidTiles)) {
+				enemies[i].acceleration.x = 0.5;
+				enemies[i].forward = false;
+			}
+			if (enemies[i].collidedRight || !enemies[i].canDropDownRight(map.mapData, solidTiles)) {
+				enemies[i].acceleration.x = -0.5;
+				enemies[i].forward = true;
+			}
+			//Enemies respawn if goes out of bounds
+			if (checkEntityOutOfBounds(enemies[i])) enemies[i].reset();
 		}
-		else if (penetration.second < 0) {
-			player.velocity.y = 0;
-			player.collidedTop = true;
+
+		//Boxes falling(possibly) update
+		for (int i = 0; i < boxes.size(); ++i) {
+			boxes[i].Update(elapsed, map.mapData, solidTiles);
+
+			//Player Collision with Box
+			player.SATCollidesWith(boxes[i], penetration);
+			if (penetration.second > 0 && player.velocity.y < 0) {
+				player.velocity.y = 0;
+				player.collidedBottom = true;
+			}
+			else if (penetration.second < 0) {
+				player.velocity.y = 0;
+				player.collidedTop = true;
+			}
+			//Boxes respawn if fallen out of bounds
+			if (checkEntityOutOfBounds(boxes[i])) boxes[i].reset();
 		}
-		//Boxes respawn if fallen out of bounds
-		if (checkEntityOutOfBounds(boxes[i])) boxes[i].reset();
-	}
 
-	//Platform update, also resolves platform player collision + movement
-	for (int i = 0; i < platforms.size(); ++i) {
-		platforms[i].Update(elapsed, map.mapData, solidTiles, player);
-	}
+		//Platform update, also resolves platform player collision + movement
+		for (int i = 0; i < platforms.size(); ++i) {
+			platforms[i].Update(elapsed, map.mapData, solidTiles, player);
+		}
 
-	//Player loses health when touches an enemy
-	for (int i = 0; i < enemies.size(); ++i) {
-		if (invulTime <= 0) {
-			if (player.SATCollidesWith(enemies[i], penetration)) {
+		//Player loses health when touches an enemy
+		for (int i = 0; i < enemies.size(); ++i) {
+			if (invulTime <= 0 && player.SATCollidesWith(enemies[i], penetration)) {
 				playerHealth -= 1;
 				healthSprites[playerHealth].spriteIndex += 1;
 				invulTime = 1.5;
 				Mix_PlayChannel(-1, ghost, 0);
 			}
 		}
-	}
-	if (playerHealth < 1) playerDeath();
+		if (playerHealth < 1) playerDeath();
 
-	//Player restarts when touches water
-	int gridX, gridY;
-	worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
-	if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
-		playerDeath();
-		Mix_PlayChannel(-1, splash, 0);
-	}
-	//Player restarts when touches lava
-	if (map.mapData[gridY][gridX] == 13 || map.mapData[gridY][gridX] == 42) {
-		playerDeath();
-		Mix_PlayChannel(-1, lava, 0);
-	}
+		//Player restarts when touches water
+		int gridX, gridY;
+		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
+		if (map.mapData[gridY][gridX] == 11 || map.mapData[gridY][gridX] == 40) {
+			playerDeath();
+			Mix_PlayChannel(-1, splash, 0);
+		}
+		//Player restarts when touches lava
+		if (map.mapData[gridY][gridX] == 13 || map.mapData[gridY][gridX] == 42) {
+			playerDeath();
+			Mix_PlayChannel(-1, lava, 0);
+		}
 
-	//Player picks up key on collision
-	if (map.mapData[gridY][gridX] == 14) {
-		pickUpKey(gridY, gridX);
+		//Player picks up key on collision
+		if (map.mapData[gridY][gridX] == 14) {
+			pickUpKey(gridY, gridX);
+		}
+		//Translate the view matrix by the player's position
+		viewMatrix.Identity();
+		viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
 	}
-	//Translate the view matrix by the player's position
-	viewMatrix.Identity();
-	viewMatrix.Translate(-player.Position.x, -player.Position.y, 0);
 }
 
 void GameState::processKeys(const Uint8 * keys)
@@ -481,15 +484,35 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 	}
 }
 
+//Renders the current life count
+void GameState::RenderLevelIntro(ShaderProgram& program) {
+	viewMatrix.Identity();
+	playerLife.Render(program, viewMatrix);
+	DrawMessage(program, fontTextureID, "x ", 0.0f, 0.0f, 0.3f, -0.15f, 1.0f);
+	if (playerHasDied) {
+		float oldLivesAlpha = mapValue(0.75 - animationElapsed, 0, 0.75, 0.0, 1.0);
+		float newLivesAlpha = mapValue(animationElapsed, 0.25, 1.0, 0.0, 1.0);
+		DrawMessage(program, fontTextureID, std::to_string(lives + 1), 0.3f, 0.0f, 0.3f, -0.15f, oldLivesAlpha);
+		DrawMessage(program, fontTextureID, std::to_string(lives), 0.3f, 0.0f, 0.3f, -0.15f, newLivesAlpha);
+	}
+	else {
+		DrawMessage(program, fontTextureID, std::to_string(lives), 0.3f, 0.0f, 0.3f, -0.15f, 1.0f);
+	}
+}
+
 //Draws the game state (tilemap and entities)
 void GameState::Render(ShaderProgram & program)
 {
-	float alpha = easeInOut(0.0, 1.0, animationElapsed*0.4);
-	alpha = alpha > 1 ? 1 : alpha;
 	switch (mode) {
-		case Level1:
-		case Level2:
-		case Level3:
+	case Level1:
+	case Level2:
+	case Level3:
+		if (animationElapsed < 2) {
+			RenderLevelIntro(program);
+		}
+		else {
+			float alpha = easeInOut(0.0, 1.0, (animationElapsed - 2)*0.4);
+			alpha = alpha > 1 ? 1 : alpha;
 			DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0, alpha);
 			if (alpha < 1) {
 				player.alpha = alpha;
@@ -513,37 +536,38 @@ void GameState::Render(ShaderProgram & program)
 				healthSprites[i].alpha = alpha;
 				healthSprites[i].Render(program, viewMatrix);
 			}
-			break;
-		case Victory:
-			viewMatrix.Identity();
-			glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
-			DrawMessage(program, fontTextureID, "VICTORY", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
-			break;
-		case Defeat:
-			viewMatrix.Identity();
-			glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
-			DrawMessage(program, fontTextureID, "git gud", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
-			break;
-		case Menu:
-			viewMatrix.Identity();
-			glClearColor(0.0, 0.0, 0.0, 1.0f);
-			DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Start Game", -0.6f, 0.0, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Exit Game", -0.525f, -1.0, 0.3f, -0.15f, 1.0f);
-			break;
-		case Instruction:
-			viewMatrix.Identity();
-			glClearColor(0.0, 0.0f, 0.0f, 1.0f);
-			DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.2f, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.3f, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "R : Restart Level", -1.125f, -0.8f, 0.3f, -0.15f, 1.0f);
-			DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -1.6f, 0.3f, -0.15f, 1.0f);
-			break;
 		}
+		break;
+	case Victory:
+		viewMatrix.Identity();
+		glClearColor(0.0f, 0.659f, 0.518f, 1.0f);
+		DrawMessage(program, fontTextureID, "VICTORY", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
+		break;
+	case Defeat:
+		viewMatrix.Identity();
+		glClearColor(0.855f, 0.098f, 0.153f, 1.0f);
+		DrawMessage(program, fontTextureID, "git gud", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -0.5f, 0.3f, -0.15f, 1.0f);
+		break;
+	case Menu:
+		viewMatrix.Identity();
+		glClearColor(0.0, 0.0, 0.0, 1.0f);
+		DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, "Start Game", -0.6f, 0.0, 0.3f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, "Exit Game", -0.525f, -1.0, 0.3f, -0.15f, 1.0f);
+		break;
+	case Instruction:
+		viewMatrix.Identity();
+		glClearColor(0.0, 0.0f, 0.0f, 1.0f);
+		DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.2f, 0.3f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.3f, 0.3f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, "R : Restart Level", -1.125f, -0.8f, 0.3f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, "Back to Menu", -0.75f, -1.6f, 0.3f, -0.15f, 1.0f);
+		break;
+	}
 }
 
 // Destructor for GameState
