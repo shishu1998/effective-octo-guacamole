@@ -586,6 +586,7 @@ void GameState::Render(ShaderProgram & program)
 				healthSprites[i].Render(program, viewMatrix);
 			}
 			mushroom.Render(program, viewMatrix);
+			mushroomTile.alpha = alpha;
 			mushroomTile.Render(program, viewMatrix);
 		}
 		break;
