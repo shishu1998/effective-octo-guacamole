@@ -80,6 +80,8 @@ void GameState::setupLevel() {
 
 void GameState::goToNextLevel() {
 	playerHasDied = false;
+	cheat = false;
+	player.isStatic = false;
 	playerIsHigh = false;
 	switch (mode) {
 		case Menu:
@@ -394,14 +396,6 @@ void GameState::processKeys(const Uint8 * keys)
 //Process the key input while in a level
 void GameState::processKeysInLevel(const Uint8 * keys)
 {
-	if (keys[SDL_SCANCODE_A]) {
-		player.acceleration.x = -1.2;
-		player.forward = false;
-	}
-	if (keys[SDL_SCANCODE_D]) {
-		player.acceleration.x = 1.2;
-		player.forward = true;
-	}
 	if (keys[SDL_SCANCODE_W]) {
 		int gridX, gridY;
 		worldToTileCoordinates(player.Position.x, player.Position.y, &gridX, &gridY);
@@ -415,23 +409,49 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 			Mix_PlayChannel(-1, doorLock, 0);
 		}
 	}
-	if (keys[SDL_SCANCODE_SPACE] && canJump) {
-		if (player.collidedBottom) {
-			player.velocity.y = 2.5;
-			Mix_PlayChannel(-1, jump, 0);
-			canJump = false;
+	if (cheat) {
+		if (keys[SDL_SCANCODE_W]) {
+			player.Position.y += 0.02;
 		}
-		if (player.collidedLeft || player.collidedRight) {
-			player.velocity.y = 1.8;
-			player.velocity.x = player.forward ? -1.5 : 1.5;
-			canJump = false;
+		if (keys[SDL_SCANCODE_A]) {
+			player.Position.x -= 0.02;
+			player.forward = false;
+		}
+		if (keys[SDL_SCANCODE_S]) {
+			player.Position.y -= 0.02;
+		}
+		if (keys[SDL_SCANCODE_D]) {
+			player.Position.x += 0.02;
+			player.forward = true;
 		}
 	}
-	if (!(keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_D])) {
-		player.acceleration.x = 0.0;
-		player.acceleration.y = 0.0;
+	else {
+		if (keys[SDL_SCANCODE_A]) {
+			player.acceleration.x = -1.2;
+			player.forward = false;
+		}
+		if (keys[SDL_SCANCODE_D]) {
+			player.acceleration.x = 1.2;
+			player.forward = true;
+		}
+		if (keys[SDL_SCANCODE_SPACE] && canJump) {
+			if (player.collidedBottom) {
+				player.velocity.y = 2.5;
+				Mix_PlayChannel(-1, jump, 0);
+				canJump = false;
+			}
+			if (player.collidedLeft || player.collidedRight) {
+				player.velocity.y = 1.8;
+				player.velocity.x = player.forward ? -1.5 : 1.5;
+				canJump = false;
+			}
+		}
+		if (!(keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_D])) {
+			player.acceleration.x = 0.0;
+			player.acceleration.y = 0.0;
+		}
+		if (!keys[SDL_SCANCODE_SPACE]) canJump = true;
 	}
-	if (!keys[SDL_SCANCODE_SPACE]) canJump = true;
 }
 
 void GameState::processEvents(SDL_Event &event) {
@@ -476,6 +496,13 @@ void GameState::processEvents(SDL_Event &event) {
 		case Level3:
 			if (event.key.keysym.scancode == SDL_SCANCODE_R) {
 				playerDeath();
+			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_F1) {
+				cheat = !cheat;
+				player.isStatic = !player.isStatic;
+			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_N) {
+				goToNextLevel();
 			}
 			break;
 		}
