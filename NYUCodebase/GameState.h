@@ -27,7 +27,6 @@ public:
 	std::vector<Entity> boxes;
 	std::vector<MovingPlatform> platforms;
 	std::unordered_set<int> solidTiles;
-	std::unordered_set<int> fluidTiles;
 	Entity player;
 	Entity playerLife;
 
