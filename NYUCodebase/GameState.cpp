@@ -48,6 +48,9 @@ FlareMap & GameState::chooseMap()
 			return map2;
 		case Level3:
 			return map3;
+		case Menu:
+		case Instruction:
+			return menuMap;
 	}
 }
 
@@ -607,7 +610,7 @@ void GameState::Render(ShaderProgram & program)
 		viewMatrix.Identity();
 		viewMatrix.Translate(-3.55f, 2.0f, 0.0f);
 		glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
-		DrawLevel(program, TextureID, menuMap, viewMatrix, 0.0, 0.0, 1.0f);
+		DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0, 1.0f);
 		DrawMessage(program, fontTextureID, "OCTO GUAC", -1.28f, 1.0, 0.5f, -0.15f, 1.0f);
 		DrawMessage(program, fontTextureID, "Start Game", -0.6f, 0.0, 0.3f, -0.15f, 1.0f);
 		DrawMessage(program, fontTextureID, "Instructions", -0.75f, -0.5, 0.3f, -0.15f, 1.0f);
@@ -617,7 +620,7 @@ void GameState::Render(ShaderProgram & program)
 		viewMatrix.Identity();
 		viewMatrix.Translate(-3.55f, 2.0f, 0.0f);
 		glClearColor(0.553f, 0.765f, 0.855f, 0.0f);
-		DrawLevel(program, TextureID, menuMap, viewMatrix, 0.0, 0.0, 1.0f);
+		DrawLevel(program, TextureID, chooseMap(), viewMatrix, 0.0, 0.0, 1.0f);
 		DrawMessage(program, fontTextureID, "Instructions", -1.79f, 1.0f, 0.5f, -0.15f, 1.0f);
 		DrawMessage(program, fontTextureID, "A/D : Left/Right", -1.05f, 0.2f, 0.3f, -0.15f, 1.0f);
 		DrawMessage(program, fontTextureID, "SPACE : Jump", -0.75f, -0.3f, 0.3f, -0.15f, 1.0f);
