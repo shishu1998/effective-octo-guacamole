@@ -17,6 +17,7 @@
 
 SDL_Window* displayWindow;
 ShaderProgram program;
+ShaderProgram invertProgram;
 Matrix projectionMatrix;
 const Uint8 *keys = SDL_GetKeyboardState(nullptr);
 float lastFrameTicks = 0.0f;
@@ -34,6 +35,7 @@ void init() {
 #endif
 
 	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
+	invertProgram.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_inverse_textured.glsl");
 
 	glViewport(0, 0, 960, 540);
 	glEnable(GL_BLEND);
@@ -78,7 +80,7 @@ int main(int argc, char *argv[])
 			elapsed -= FIXED_TIMESTEP;
 		}
 		accumulator = elapsed;
-		state.Render(program);
+		state.playerIsHigh ? state.Render(invertProgram) : state.Render(program);
 		SDL_GL_SwapWindow(displayWindow);
 	}
 	SDL_Quit();

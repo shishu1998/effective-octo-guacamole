@@ -50,8 +50,8 @@ FlareMap & GameState::chooseMap()
 	}
 }
 
-//Scans and sets the coordinates of the door on the map
-void GameState::setExitCoordinates(const FlareMap& map) {
+//Scans and sets the coordinates of the door and mushroom tile on the map
+void GameState::setObjectCoordinates(const FlareMap& map) {
 	for (int i = 0; i < map.mapData.size(); ++i) {
 		for (int j = 0; j < map.mapData[i].size(); ++j) {
 			if (map.mapData[i][j] == 167) {
@@ -71,7 +71,7 @@ void GameState::setupLevel() {
 	for (int i = 0; i < map.entities.size(); i++) {
 		PlaceEntity(map.entities[i].type, map.entities[i].x * tileSize, map.entities[i].y * -tileSize);
 	}
-	setExitCoordinates(map);
+	setObjectCoordinates(map);
 }
 
 void GameState::goToNextLevel() {

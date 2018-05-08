@@ -20,6 +20,7 @@ public:
 	FlareMap map3;
 	GameMode mode = Menu;
 	bool finished = false;
+	bool playerIsHigh = false;
 
 	std::vector<Entity> enemies;
 	std::vector<Entity> boxes;
@@ -44,6 +45,8 @@ public:
 	int keyX, keyY;
 	//stores the coordinates of the exit
 	int doorX, doorY;
+	// stores the coordinates of the mushroom box
+	int mushroomX, mushroomY;
 
 	Matrix viewMatrix;
 	float animationElapsed;
@@ -67,7 +70,7 @@ public:
 
 	void loadResources();
 	FlareMap& chooseMap();
-	void GameState::setExitCoordinates(const FlareMap& map);
+	void GameState::setObjectCoordinates(const FlareMap& map);
 	void setupLevel();
 	void goToNextLevel();
 	void setupHealth();
