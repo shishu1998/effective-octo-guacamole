@@ -501,6 +501,9 @@ void GameState::processEvents(SDL_Event &event) {
 				cheat = !cheat;
 				player.isStatic = !player.isStatic;
 			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_N) {
+				goToNextLevel();
+			}
 			break;
 		}
 	}
