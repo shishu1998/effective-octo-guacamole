@@ -303,10 +303,13 @@ void GameState::updateLevel(float elapsed)
 		//Player collision with MushroomTile
 		if (player.SATCollidesWith(mushroomTile, penetration) && penetration.second != 0.0f) {
 			if (penetration.second < 0.0f) {
-				mushroomTile.spriteIndex = 1;
-				mushroom.alpha = 1.0f;
-				mushroomElapsed += elapsed;
 				player.velocity.y = 0.0f;
+				//Only update mushroom when we haven't popped out a mushroom
+				if (mushroomTile.spriteIndex == 0) {
+					mushroomTile.spriteIndex = 1;
+					mushroom.alpha = 1.0f;
+					mushroomElapsed += elapsed;
+				}
 			}
 			if (penetration.second > 0.0f && player.velocity.y < 0.0f) {
 				player.collidedBottom = true;
