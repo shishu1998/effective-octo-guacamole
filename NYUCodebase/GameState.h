@@ -4,6 +4,7 @@
 #include <vector>
 #include <SDL.h>
 #include <SDL_mixer.h>
+#define menuFILE "menuMap.txt"
 #define level1FILE "mapA.txt"
 #define level2FILE "mapB.txt"
 #define level3FILE "mapC.txt"
@@ -15,6 +16,7 @@ class GameState {
 public:
 	int TextureID;
 	int fontTextureID;
+	FlareMap menuMap;
 	FlareMap map1;
 	FlareMap map2;
 	FlareMap map3;
