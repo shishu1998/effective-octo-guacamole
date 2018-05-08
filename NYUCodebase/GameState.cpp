@@ -301,8 +301,6 @@ void GameState::updateLevel(float elapsed)
 			else if (penetration.second < 0) {
 				player.velocity.y = 0;
 				player.collidedTop = true;
-				boxes[i].velocity.y = 0;
-				boxes[i].collidedBottom = true;
 			}
 			//Boxes respawn if fallen out of bounds
 			if (checkEntityOutOfBounds(boxes[i])) boxes[i].reset();
