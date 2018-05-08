@@ -50,8 +50,8 @@ FlareMap & GameState::chooseMap()
 	}
 }
 
-//Scans and sets the coordinates of the door and mushroom tile on the map
-void GameState::setObjectCoordinates(const FlareMap& map) {
+//Scans and sets the coordinates of the door on the map
+void GameState::setExitCoordinates(const FlareMap& map) {
 	for (int i = 0; i < map.mapData.size(); ++i) {
 		for (int j = 0; j < map.mapData[i].size(); ++j) {
 			if (map.mapData[i][j] == 167) {
@@ -71,7 +71,7 @@ void GameState::setupLevel() {
 	for (int i = 0; i < map.entities.size(); i++) {
 		PlaceEntity(map.entities[i].type, map.entities[i].x * tileSize, map.entities[i].y * -tileSize);
 	}
-	setObjectCoordinates(map);
+	setExitCoordinates(map);
 }
 
 void GameState::goToNextLevel() {
@@ -95,6 +95,10 @@ void GameState::goToNextLevel() {
 			glClearColor(0.455f, 0.0f, 0.416f, 1.0f);
 			setupLevel();
 			playBackgroundMusic();
+			delete mushroomTile;
+			mushroomTile = NULL;
+			delete mushroom;
+			mushroom = NULL;
 			break;
 		case Level2:
 			mode = Level3;
@@ -174,6 +178,11 @@ void GameState::resetEntities()
 	for (int i = 0; i < healthSprites.size(); ++i) {
 		healthSprites[i].reset();
 	}
+	if (mushroomTile) mushroomTile->reset();
+	if (mushroom) {
+		mushroom->reset();
+		mushroom->alpha = 0.0f;
+	}
 }
 
 //Resets players and entities upon death
@@ -182,6 +191,8 @@ void GameState::playerDeath() {
 	invulTime = 0;
 	animationElapsed = 0;
 	playerHasDied = true;
+	playerIsHigh = false;
+	mushroomElapsed = 0;
 	resetEntities();
 	FlareMap& map = chooseMap();
 	//put the key back and lock the door if the player already has a key
@@ -293,6 +304,33 @@ void GameState::updateLevel(float elapsed)
 			}
 			//Boxes respawn if fallen out of bounds
 			if (checkEntityOutOfBounds(boxes[i])) boxes[i].reset();
+		}
+
+		//Player collision with MushroomTile
+		if (player.SATCollidesWith(*mushroomTile, penetration) && penetration.second != 0.0f) {
+			if (penetration.second < 0.0f) {
+				mushroomTile->spriteIndex = 1;
+				mushroom->alpha = 1.0f;
+				mushroomElapsed += elapsed;
+				player.velocity.y = 0.0f;
+			}
+			if (penetration.second > 0.0f && player.velocity.y < 0.0f) {
+				player.collidedBottom = true;
+				player.velocity.y = 0.0f;
+			}
+		}
+
+		//Updates the mushroom coordinates
+		if (mushroomElapsed > 0.0f) {
+			float displacementY = easeOut(mushroomElapsed*0.4, 0.0, tileSize/2);
+			displacementY = displacementY > tileSize/2 ? tileSize/2 : displacementY;
+			mushroom->Position.y = mushroom->originalPosition.y + displacementY;
+			mushroomElapsed += elapsed;
+		}
+
+		//If player eats a mushroom
+		if (mushroom->alpha != 0 && player.SATCollidesWith(*mushroom, penetration)) {
+			playerIsHigh = true;
 		}
 
 		//Platform update, also resolves platform player collision + movement
@@ -482,6 +520,13 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 		box.setResetProperties();
 		boxes.emplace_back(box);
 	}
+	else if (type == "MushroomTile") {
+		mushroomTile = new Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 130, tileSize), createSheetSpriteBySpriteIndex(TextureID, 160, tileSize) }), Box, true);
+		mushroomTile->setResetProperties();
+		mushroom = new Entity(x, y+0.1, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 108, tileSize) }), Mushroom, true);
+		mushroom->alpha = 0.0f;
+		mushroom->setResetProperties();
+	}
 }
 
 //Renders the current life count
@@ -536,6 +581,8 @@ void GameState::Render(ShaderProgram & program)
 				healthSprites[i].alpha = alpha;
 				healthSprites[i].Render(program, viewMatrix);
 			}
+			if (mushroom) mushroom->Render(program, viewMatrix);
+			if(mushroomTile) mushroomTile->Render(program, viewMatrix);
 		}
 		break;
 	case Victory:
@@ -580,4 +627,6 @@ GameState::~GameState() {
 	Mix_FreeChunk(doorOpen);
 	Mix_FreeChunk(splash);
 	Mix_CloseAudio();
+	delete mushroom;
+	delete mushroomTile;
 }

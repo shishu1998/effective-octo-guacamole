@@ -45,8 +45,10 @@ public:
 	int keyX, keyY;
 	//stores the coordinates of the exit
 	int doorX, doorY;
-	// stores the coordinates of the mushroom box
-	int mushroomX, mushroomY;
+	// Mushroom Stuff
+	Entity* mushroomTile;
+	Entity* mushroom;
+	float mushroomElapsed = 0;
 
 	Matrix viewMatrix;
 	float animationElapsed;
@@ -70,7 +72,7 @@ public:
 
 	void loadResources();
 	FlareMap& chooseMap();
-	void GameState::setObjectCoordinates(const FlareMap& map);
+	void GameState::setExitCoordinates(const FlareMap& map);
 	void setupLevel();
 	void goToNextLevel();
 	void setupHealth();
