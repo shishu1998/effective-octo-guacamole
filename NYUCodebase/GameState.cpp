@@ -16,7 +16,7 @@ void GameState::loadResources() {
 		health.setResetProperties();
 		healthSprites.emplace_back(health);
 	}
-	playerLife = Entity(-0.65, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), Health, false);
+	playerLife = Entity(-0.65, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize)}), Life, false);
 
 	solidTiles = std::unordered_set<int>(Solids);
 	fluidTiles = std::unordered_set<int>(Fluids);
