@@ -31,6 +31,8 @@ public:
 
 	// Emulates keydown event, keys is faster than polling
 	bool canJump = true;
+	// Stores whether or not cheat is enabled
+	bool cheat = false;
 
 	//Player Health, Lives, and Invulnerability stuff
 	int lives = 3;
