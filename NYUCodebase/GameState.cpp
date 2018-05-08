@@ -20,7 +20,6 @@ void GameState::loadResources() {
 	playerLife = Entity(-0.3, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize)}), Life, false);
 
 	solidTiles = std::unordered_set<int>(Solids);
-	fluidTiles = std::unordered_set<int>(Fluids);
 	
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	bgm = Mix_LoadMUS("Running.mp3");
