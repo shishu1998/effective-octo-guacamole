@@ -76,3 +76,8 @@ location=59,24,1,1
 type=MovingY
 location=67,23,1,1
 
+[ObjectsLayer]
+# mushroomTile
+type=MushroomTile
+location=31,5,0,0
+

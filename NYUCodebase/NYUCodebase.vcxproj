@@ -102,6 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.glsl" />
+    <None Include="fragment_inverse_textured.glsl" />
     <None Include="fragment_textured.glsl" />
     <None Include="vertex.glsl" />
   </ItemGroup>

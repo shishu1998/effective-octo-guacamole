@@ -85,6 +85,9 @@
     <None Include="fragment.glsl" />
     <None Include="vertex.glsl" />
     <None Include="fragment_textured.glsl" />
+    <None Include="fragment_inverse_textured.glsl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="font1.png">
