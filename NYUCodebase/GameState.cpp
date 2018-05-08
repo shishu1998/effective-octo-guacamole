@@ -16,7 +16,7 @@ void GameState::loadResources() {
 		health.setResetProperties();
 		healthSprites.emplace_back(health);
 	}
-	playerLife = Entity(-0.65, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize)}), Life, false);
+	playerLife = Entity(-0.3, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize)}), Life, false);
 
 	solidTiles = std::unordered_set<int>(Solids);
 	fluidTiles = std::unordered_set<int>(Fluids);
@@ -484,6 +484,22 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 	}
 }
 
+//Renders the current life count
+void GameState::RenderLevelIntro(ShaderProgram& program) {
+	viewMatrix.Identity();
+	playerLife.Render(program, viewMatrix);
+	DrawMessage(program, fontTextureID, "x ", 0.0f, 0.0f, 0.3f, -0.15f, 1.0f);
+	if (playerHasDied) {
+		float oldLivesAlpha = mapValue(0.75 - animationElapsed, 0, 0.75, 0.0, 1.0);
+		float newLivesAlpha = mapValue(animationElapsed, 0.25, 1.0, 0.0, 1.0);
+		DrawMessage(program, fontTextureID, std::to_string(lives + 1), 0.3f, 0.0f, 0.3f, -0.15f, oldLivesAlpha);
+		DrawMessage(program, fontTextureID, std::to_string(lives), 0.3f, 0.0f, 0.3f, -0.15f, newLivesAlpha);
+	}
+	else {
+		DrawMessage(program, fontTextureID, std::to_string(lives), 0.3f, 0.0f, 0.3f, -0.15f, 1.0f);
+	}
+}
+
 //Draws the game state (tilemap and entities)
 void GameState::Render(ShaderProgram & program)
 {
@@ -492,18 +508,7 @@ void GameState::Render(ShaderProgram & program)
 	case Level2:
 	case Level3:
 		if (animationElapsed < 2) {
-			viewMatrix.Identity();
-			playerLife.Render(program, viewMatrix);
-			DrawMessage(program, fontTextureID, "x ", -0.375f, 0.0f, 0.3f, -0.15f, 1.0f);
-			if (playerHasDied) {
-				float oldLivesAlpha = mapValue(0.75 - animationElapsed, 0, 0.75, 0.0, 1.0);
-				float newLivesAlpha = mapValue(animationElapsed, 0.25, 1.0, 0.0, 1.0);
-				DrawMessage(program, fontTextureID, std::to_string(lives + 1), -0.075f, 0.0f, 0.3f, -0.15f, oldLivesAlpha);
-				DrawMessage(program, fontTextureID, std::to_string(lives), -0.075f, 0.0f, 0.3f, -0.15f, newLivesAlpha);
-			}
-			else {
-				DrawMessage(program, fontTextureID, std::to_string(lives), -0.075, 0.0f, 0.3f, -0.15f, 1.0f);
-			}
+			RenderLevelIntro(program);
 		}
 		else {
 			float alpha = easeInOut(0.0, 1.0, (animationElapsed - 2)*0.4);

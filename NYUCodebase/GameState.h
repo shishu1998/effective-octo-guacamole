@@ -85,6 +85,7 @@ public:
 	bool checkEntityOutOfBounds(const Entity& other);
 	void PlaceEntity(std::string type, float x, float y);
 
+	void GameState::RenderLevelIntro(ShaderProgram& program);
 	void Render(ShaderProgram &program);
 
 	void GameState::playBackgroundMusic() const;
