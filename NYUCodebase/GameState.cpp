@@ -192,6 +192,8 @@ void GameState::playerDeath() {
 	animationElapsed = 0;
 	playerHasDied = true;
 	playerIsHigh = false;
+	cheat = false;
+	player.isStatic = false;
 	mushroomElapsed = 0;
 	resetEntities();
 	FlareMap& map = chooseMap();
