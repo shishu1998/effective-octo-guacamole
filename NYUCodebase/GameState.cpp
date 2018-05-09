@@ -428,11 +428,11 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 	}
 	else {
 		if (keys[SDL_SCANCODE_A]) {
-			player.acceleration.x = -1.2;
+			playerIsHigh? player.acceleration.x = 1.2 : player.acceleration.x = -1.2;
 			player.forward = false;
 		}
 		if (keys[SDL_SCANCODE_D]) {
-			player.acceleration.x = 1.2;
+			playerIsHigh? player.acceleration.x = -1.2 : player.acceleration.x = 1.2;
 			player.forward = true;
 		}
 		if (keys[SDL_SCANCODE_SPACE] && canJump) {
@@ -444,6 +444,7 @@ void GameState::processKeysInLevel(const Uint8 * keys)
 			if (player.collidedLeft || player.collidedRight) {
 				player.velocity.y = 1.8;
 				player.velocity.x = player.forward ? -1.5 : 1.5;
+				if (playerIsHigh) player.velocity.x *= -1;
 				canJump = false;
 			}
 		}
