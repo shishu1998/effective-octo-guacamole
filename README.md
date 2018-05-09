@@ -1,3 +1,3 @@
 # effective-octo-guacamole
-Game made by Shi Shu and Mindy Ruan
-Mindy Ruan: https://github.com/mr4739
+## Game made by Shi Shu and Mindy Ruan
+Mindy's Github(https://github.com/mr4739)
