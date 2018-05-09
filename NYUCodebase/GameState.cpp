@@ -82,6 +82,7 @@ void GameState::goToNextLevel() {
 	cheat = false;
 	player.isStatic = false;
 	playerIsHigh = false;
+	mushroomElapsed = 0.0f;
 	switch (mode) {
 		case Menu:
 			//Resets the player's lives and hp after every playthrough
