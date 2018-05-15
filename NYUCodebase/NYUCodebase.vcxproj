@@ -83,6 +83,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="MovingPlatform.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="SatCollision.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="SheetSprite.cpp" />
@@ -95,6 +96,7 @@
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="MovingPlatform.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="SatCollision.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="SheetSprite.h" />

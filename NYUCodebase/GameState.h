@@ -1,6 +1,7 @@
 #pragma once
 #include "MovingPlatform.h"
 #include "FlareMap.h"
+#include "Player.h"
 #include <vector>
 #include <SDL.h>
 #include <SDL_mixer.h>
@@ -72,6 +73,7 @@ public:
 
 	~GameState();
 
+	void loadMusic();
 	void loadResources();
 	FlareMap& chooseMap();
 	void GameState::setExitCoordinates(const FlareMap& map);

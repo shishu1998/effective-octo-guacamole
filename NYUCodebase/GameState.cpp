@@ -2,6 +2,26 @@
 #include "GameState.h"
 #include "Helper.h"
 
+//Loads all the music files for the game
+void GameState::loadMusic()
+{
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+	bgm = Mix_LoadMUS("Running.mp3");
+	menuMusic = Mix_LoadMUS("MenuMusic.mp3");
+	L1Music = Mix_LoadMUS("Level1.mp3");
+	L2Music = Mix_LoadMUS("Level2.mp3");
+	L3Music = Mix_LoadMUS("Level3.mp3");
+	victoryMusic = Mix_LoadMUS("Victory.mp3");
+	gameOverMusic = Mix_LoadMUS("GameOver.mp3");
+	ghost = Mix_LoadWAV("ghost.wav");
+	jump = Mix_LoadWAV("boing_spring.wav");
+	keyPickUp = Mix_LoadWAV("coin.wav");
+	doorLock = Mix_LoadWAV("doorLock.wav");
+	doorOpen = Mix_LoadWAV("doorOpen.wav");
+	splash = Mix_LoadWAV("splash.wav");
+	lava = Mix_LoadWAV("Lava.wav");
+}
+
 //Loads the required resources for the entities
 void GameState::loadResources() {
 	TextureID = LoadTexture(RESOURCE_FOLDER"spritesheet_rgba.png");
@@ -20,22 +40,7 @@ void GameState::loadResources() {
 	playerLife = Entity(-0.3, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize)}), Life, false);
 
 	solidTiles = std::unordered_set<int>(Solids);
-	
-	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
-	bgm = Mix_LoadMUS("Running.mp3");
-	menuMusic = Mix_LoadMUS("MenuMusic.mp3");
-	L1Music = Mix_LoadMUS("Level1.mp3");
-	L2Music = Mix_LoadMUS("Level2.mp3");
-	L3Music = Mix_LoadMUS("Level3.mp3");
-	victoryMusic = Mix_LoadMUS("Victory.mp3");
-	gameOverMusic = Mix_LoadMUS("GameOver.mp3");
-	ghost = Mix_LoadWAV("ghost.wav");
-	jump = Mix_LoadWAV("boing_spring.wav");
-	keyPickUp = Mix_LoadWAV("coin.wav");
-	doorLock = Mix_LoadWAV("doorLock.wav");
-	doorOpen = Mix_LoadWAV("doorOpen.wav");
-	splash = Mix_LoadWAV("splash.wav");
-	lava = Mix_LoadWAV("Lava.wav");
+	loadMusic();
 }
 
 FlareMap & GameState::chooseMap()
@@ -141,26 +146,25 @@ void GameState::playBackgroundMusic() const{
 	Mix_VolumeMusic(20);
 	Mix_HaltMusic();
 	switch (mode) {
-	case Menu:
-	//case Instruction:
-		Mix_PlayMusic(menuMusic, -1);
-		break;
-	case Level1:
-		Mix_PlayMusic(L1Music, -1);
-		break;
-	case Level2:
-		Mix_PlayMusic(L2Music, -1);
-		break;
-	case Level3:
-		Mix_PlayMusic(L3Music, -1);
-		break;
-	case Victory:
-		Mix_PlayMusic(victoryMusic, -1);
-		break;
-	case Defeat:
-		Mix_PlayMusic(gameOverMusic, -1);
-		break;
-	}
+		case Menu:
+			Mix_PlayMusic(menuMusic, -1);
+			break;
+		case Level1:
+			Mix_PlayMusic(L1Music, -1);
+			break;
+		case Level2:
+			Mix_PlayMusic(L2Music, -1);
+			break;
+		case Level3:
+			Mix_PlayMusic(L3Music, -1);
+			break;
+		case Victory:
+			Mix_PlayMusic(victoryMusic, -1);
+			break;
+		case Defeat:
+			Mix_PlayMusic(gameOverMusic, -1);
+			break;
+		}
 }
 
 //Resets the states of all entities in the GameState
