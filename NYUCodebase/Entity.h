@@ -9,12 +9,11 @@
 #define GRAVITY -4.9f
 #define AnimationConstant 0.2f
 
-enum EntityType {Player, Enemy, MovingBlock, Box, Health, Life, Mushroom};
 class Entity {
 public:
 	Entity();
 	Entity(float x, float y, float width, float height, bool isStatic);
-	Entity(float x, float y, std::vector<SheetSprite> sprites, EntityType type, bool isStatic);
+	Entity(float x, float y, std::vector<SheetSprite> sprites, bool isStatic);
 	void UntexturedDraw(ShaderProgram & Program);
 	void Render(ShaderProgram &Program, Matrix viewMatrix);
 	void ResetContactFlags();
@@ -58,7 +57,6 @@ public:
 
 	bool isStatic;
 	bool textured;
-	EntityType entityType;
 	
 	Entity* parent = nullptr;
 

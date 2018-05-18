@@ -28,7 +28,7 @@ public:
 	std::vector<Entity> boxes;
 	std::vector<MovingPlatform> platforms;
 	std::unordered_set<int> solidTiles;
-	Entity player;
+	Player player;
 	Entity playerLife;
 
 	// Emulates keydown event, keys is faster than polling
@@ -37,8 +37,6 @@ public:
 	bool cheat = false;
 
 	//Player Health, Lives, and Invulnerability stuff
-	int lives = 3;
-	int playerHealth = 3;
 	float invulTime = 0;
 	bool playerHasDied = false;
 	std::vector<Entity> healthSprites;

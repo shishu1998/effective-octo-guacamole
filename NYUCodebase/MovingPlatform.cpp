@@ -3,7 +3,7 @@
 MovingPlatform::MovingPlatform(int TextureID, float x, float y, int numBlocks)
 {
 	for (int i = 0; i < numBlocks; ++i) {
-		Entity block = Entity(x + tileSize * i, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 396, tileSize) }), MovingBlock, true);
+		Entity block = Entity(x + tileSize * i, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 396, tileSize) }), true);
 		block.setResetProperties();
 		blocks.emplace_back(block);
 	}

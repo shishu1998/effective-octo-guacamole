@@ -6,8 +6,8 @@ Entity::Entity() : textured(false) {}
 Entity::Entity(float x, float y, float width, float height, bool isStatic) : Position(x, y, 0), size(width, height, 0), isStatic(isStatic),textured(false) {
 	matrix.Translate(Position.x, Position.y, 0);
 }
-Entity::Entity(float x, float y, std::vector<SheetSprite> sprites, EntityType type, bool isStatic) : Position(x,y,0), 
-size(sprites[0].width * sprites[0].size/ sprites[0].height, sprites[0].size, 0), sprites(sprites), entityType(type), isStatic(isStatic), textured(true) {
+Entity::Entity(float x, float y, std::vector<SheetSprite> sprites, bool isStatic) : Position(x,y,0), 
+size(sprites[0].width * sprites[0].size/ sprites[0].height, sprites[0].size, 0), sprites(sprites), isStatic(isStatic), textured(true) {
 	matrix.Translate(Position.x, Position.y, 0);
 }
 

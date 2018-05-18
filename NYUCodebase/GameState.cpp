@@ -32,12 +32,12 @@ void GameState::loadResources() {
 	map3.Load(level3FILE);
 
 	for (int i = 0; i < 3; ++i) {
-		Entity health = Entity(-16 + i, 9.0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), Health, false);
+		Entity health = Entity(-16 + i, 9.0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), false);
 		health.size = Vector4(1.0,1.0,1.0);
 		health.setResetProperties();
 		healthSprites.emplace_back(health);
 	}
-	playerLife = Entity(-0.3, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize)}), Life, false);
+	playerLife = Entity(-0.3, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize)}), false);
 
 	solidTiles = std::unordered_set<int>(Solids);
 	loadMusic();
@@ -91,8 +91,8 @@ void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
 			//Resets the player's lives and hp after every playthrough
-			lives = 3;
-			playerHealth = 3;
+			player.lives = 3;
+			player.health = 3;
 			for (int i = 0; i < healthSprites.size(); ++i) {
 				healthSprites[i].reset();
 			}
@@ -191,7 +191,7 @@ void GameState::resetEntities()
 
 //Resets players and entities upon death
 void GameState::playerDeath() {
-	playerHealth = 3;
+	player.health = 3;
 	invulTime = 0;
 	animationElapsed = 0;
 	playerHasDied = true;
@@ -205,9 +205,9 @@ void GameState::playerDeath() {
 	if (playerHasKey) {
 		resetKey();
 	}
-	lives -= 1;
+	player.lives -= 1;
 	//player has no lives left; game over
-	if (!lives) {
+	if (!player.lives) {
 		mode = Defeat;
 		playBackgroundMusic();
 	}
@@ -357,13 +357,13 @@ void GameState::updateLevel(float elapsed)
 		//Player loses health when touches an enemy
 		for (int i = 0; i < enemies.size(); ++i) {
 			if (invulTime <= 0 && player.SATCollidesWith(enemies[i], penetration)) {
-				playerHealth -= 1;
-				healthSprites[playerHealth].spriteIndex += 1;
+				player.health -= 1;
+				healthSprites[player.health].spriteIndex += 1;
 				invulTime = 1.5;
 				Mix_PlayChannel(-1, ghost, 0);
 			}
 		}
-		if (playerHealth < 1) playerDeath();
+		if (player.health < 1) playerDeath();
 
 		//Player restarts when touches water
 		int gridX, gridY;
@@ -530,11 +530,11 @@ bool GameState::checkEntityOutOfBounds(const Entity & other)
 void GameState::PlaceEntity(std::string type, float x, float y)
 {
 	if (type == "Player") {
-		player = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }), Player, false);
+		player = Player(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }));
 		player.setResetProperties();
 	}
 	else if (type == "Enemy") {
-		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), Enemy, false);
+		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), false);
 		enemy.acceleration.x = -0.5;
 		enemy.setResetProperties();
 		enemy.forward = true;
@@ -553,19 +553,19 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 		platforms.emplace_back(plat);
 	}
 	else if (type == "Box") {
-		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 191, tileSize) }), Box, false);
+		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 191, tileSize) }), false);
 		box.setResetProperties();
 		boxes.emplace_back(box);
 	}
 	else if (type == "Ice") {
-		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 491, tileSize) }), Box, false);
+		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 491, tileSize) }), false);
 		box.setResetProperties();
 		boxes.emplace_back(box);
 	}
 	else if (type == "MushroomTile") {
-		mushroomTile = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 130, tileSize), createSheetSpriteBySpriteIndex(TextureID, 160, tileSize) }), Box, true);
+		mushroomTile = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 130, tileSize), createSheetSpriteBySpriteIndex(TextureID, 160, tileSize) }), true);
 		mushroomTile.setResetProperties();
-		mushroom = Entity(x, y+0.1, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 108, tileSize) }), Mushroom, true);
+		mushroom = Entity(x, y+0.1, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 108, tileSize) }), true);
 		mushroom.alpha = 0.0f;
 		mushroom.setResetProperties();
 	}
@@ -579,11 +579,11 @@ void GameState::RenderLevelIntro(ShaderProgram& program) {
 	if (playerHasDied) {
 		float oldLivesAlpha = mapValue(0.75 - animationElapsed, 0, 0.75, 0.0, 1.0);
 		float newLivesAlpha = mapValue(animationElapsed, 0.25, 1.0, 0.0, 1.0);
-		DrawMessage(program, fontTextureID, std::to_string(lives + 1), 0.3f, 0.0f, 0.3f, -0.15f, oldLivesAlpha);
-		DrawMessage(program, fontTextureID, std::to_string(lives), 0.3f, 0.0f, 0.3f, -0.15f, newLivesAlpha);
+		DrawMessage(program, fontTextureID, std::to_string(player.lives + 1), 0.3f, 0.0f, 0.3f, -0.15f, oldLivesAlpha);
+		DrawMessage(program, fontTextureID, std::to_string(player.lives), 0.3f, 0.0f, 0.3f, -0.15f, newLivesAlpha);
 	}
 	else {
-		DrawMessage(program, fontTextureID, std::to_string(lives), 0.3f, 0.0f, 0.3f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, std::to_string(player.lives), 0.3f, 0.0f, 0.3f, -0.15f, 1.0f);
 	}
 }
 
