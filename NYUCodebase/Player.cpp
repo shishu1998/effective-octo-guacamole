@@ -1,4 +1,4 @@
 #include "Player.h"
 
 Player::Player() : Entity() {}
-Player::Player(float x, float y, std::vector<SheetSprite> sprites) : Entity(x, y, sprites, false), lives(3), health(3) {}
+Player::Player(float x, float y, std::vector<SheetSprite> sprites) : Entity(x, y, sprites, false) {}

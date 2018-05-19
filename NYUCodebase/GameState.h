@@ -2,6 +2,7 @@
 #include "MovingPlatform.h"
 #include "FlareMap.h"
 #include "Player.h"
+#include "Enemy.h"
 #include <vector>
 #include <SDL.h>
 #include <SDL_mixer.h>
@@ -24,7 +25,7 @@ public:
 	bool finished = false;
 	bool playerIsHigh = false;
 
-	std::vector<Entity> enemies;
+	std::vector<Enemy> enemies;
 	std::vector<Entity> boxes;
 	std::vector<MovingPlatform> platforms;
 	std::unordered_set<int> solidTiles;

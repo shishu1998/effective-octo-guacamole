@@ -33,11 +33,6 @@ public:
 	void remakeMatrix();
 	bool SATCollidesWith(Entity& Other, std::pair<float, float>& penetration);
 
-	bool canDropDownLeft(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
-	bool canDropDownRight(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
-	bool canJumpLeft(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
-	bool canJumpRight(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
-
 	void setResetProperties();
 	void reset();
 

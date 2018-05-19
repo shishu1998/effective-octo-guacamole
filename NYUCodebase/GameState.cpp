@@ -30,6 +30,7 @@ void GameState::loadResources() {
 	map1.Load(level1FILE);
 	map2.Load(level2FILE);
 	map3.Load(level3FILE);
+	player = Player(0, 0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }));
 
 	for (int i = 0; i < 3; ++i) {
 		Entity health = Entity(-16 + i, 9.0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), false);
@@ -509,6 +510,9 @@ void GameState::processEvents(SDL_Event &event) {
 				player.isStatic = !player.isStatic;
 			}
 			if (event.key.keysym.scancode == SDL_SCANCODE_N) {
+				if (playerHasKey) {
+					resetKey();
+				}
 				goToNextLevel();
 			}
 			break;
@@ -530,11 +534,13 @@ bool GameState::checkEntityOutOfBounds(const Entity & other)
 void GameState::PlaceEntity(std::string type, float x, float y)
 {
 	if (type == "Player") {
-		player = Player(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }));
+		player.Position = Vector4(x,y,0);
+		player.velocity = Vector4(0, 0, 0);
+		player.acceleration = Vector4(0, 0, 0);
 		player.setResetProperties();
 	}
 	else if (type == "Enemy") {
-		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), false);
+		Enemy enemy = Enemy(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }));
 		enemy.acceleration.x = -0.5;
 		enemy.setResetProperties();
 		enemy.forward = true;
