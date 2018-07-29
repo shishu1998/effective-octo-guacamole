@@ -5,6 +5,7 @@
 Libraries/Resources Used:
 * OpenGL
 * SDL
+* glew
 * Basic boilerplate code from [Professor Ivan Safrin](https://github.com/ivansafrin)
 * Game Assets from [Kenney](www.kenney.nl)
 
