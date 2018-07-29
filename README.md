@@ -12,4 +12,5 @@ Libraries/Resources Used:
 Instructions on how to play the game:
 1. Clone the repository
 2. Install Visual Studio with *Desktop Development with C++* selected in the workload, and *Windows 8.1 SDK and UCRT SDK* and *Windows XP Support for C++* selected in the *Optional*.
-3. Build and run the solution in visual studio
+3. Copy the dependency folders (glew, SDL2, SDL2_image, SDL2_mixer) to your C Drive
+4. Build and run the solution in visual studio
