@@ -1,22 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2042
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NYUCodebase", "NYUCodebase\NYUCodebase.vcxproj", "{49111BA2-C0AC-4ADA-A952-A55E3AF00AC8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "effective-octo-guacamole", "effective-octo-guacamole\effective-octo-guacamole.vcxproj", "{49111BA2-C0AC-4ADA-A952-A55E3AF00AC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Win32 = Debug|Win32
-		Release|Win32 = Release|Win32
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{49111BA2-C0AC-4ADA-A952-A55E3AF00AC8}.Debug|Win32.ActiveCfg = Debug|Win32
-		{49111BA2-C0AC-4ADA-A952-A55E3AF00AC8}.Debug|Win32.Build.0 = Debug|Win32
-		{49111BA2-C0AC-4ADA-A952-A55E3AF00AC8}.Release|Win32.ActiveCfg = Release|Win32
-		{49111BA2-C0AC-4ADA-A952-A55E3AF00AC8}.Release|Win32.Build.0 = Release|Win32
+		{49111BA2-C0AC-4ADA-A952-A55E3AF00AC8}.Debug|x86.ActiveCfg = Debug|Win32
+		{49111BA2-C0AC-4ADA-A952-A55E3AF00AC8}.Debug|x86.Build.0 = Debug|Win32
+		{49111BA2-C0AC-4ADA-A952-A55E3AF00AC8}.Release|x86.ActiveCfg = Release|Win32
+		{49111BA2-C0AC-4ADA-A952-A55E3AF00AC8}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C82F370-6F0B-4D52-BBAA-D87B719CB0BC}
 	EndGlobalSection
 EndGlobal
