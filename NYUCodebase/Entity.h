@@ -9,12 +9,11 @@
 #define GRAVITY -4.9f
 #define AnimationConstant 0.2f
 
-enum EntityType {Player, Enemy, MovingBlock, Box, Health, Life, Mushroom};
 class Entity {
 public:
 	Entity();
 	Entity(float x, float y, float width, float height, bool isStatic);
-	Entity(float x, float y, std::vector<SheetSprite> sprites, EntityType type, bool isStatic);
+	Entity(float x, float y, std::vector<SheetSprite> sprites, bool isStatic);
 	void UntexturedDraw(ShaderProgram & Program);
 	void Render(ShaderProgram &Program, Matrix viewMatrix);
 	void ResetContactFlags();
@@ -33,11 +32,6 @@ public:
 	std::vector<std::pair<float, float>> getCorners() const;
 	void remakeMatrix();
 	bool SATCollidesWith(Entity& Other, std::pair<float, float>& penetration);
-
-	bool canDropDownLeft(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
-	bool canDropDownRight(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
-	bool canJumpLeft(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
-	bool canJumpRight(const std::vector<std::vector<unsigned int>>& mapData, std::unordered_set<int>& solids) const;
 
 	void setResetProperties();
 	void reset();
@@ -58,7 +52,6 @@ public:
 
 	bool isStatic;
 	bool textured;
-	EntityType entityType;
 	
 	Entity* parent = nullptr;
 

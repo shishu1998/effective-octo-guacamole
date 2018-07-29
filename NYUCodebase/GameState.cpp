@@ -2,25 +2,9 @@
 #include "GameState.h"
 #include "Helper.h"
 
-//Loads the required resources for the entities
-void GameState::loadResources() {
-	TextureID = LoadTexture(RESOURCE_FOLDER"spritesheet_rgba.png");
-	fontTextureID = LoadTexture(RESOURCE_FOLDER"font1.png");
-	menuMap.Load(menuFILE);
-	map1.Load(level1FILE);
-	map2.Load(level2FILE);
-	map3.Load(level3FILE);
-
-	for (int i = 0; i < 3; ++i) {
-		Entity health = Entity(-16 + i, 9.0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), Health, false);
-		health.size = Vector4(1.0,1.0,1.0);
-		health.setResetProperties();
-		healthSprites.emplace_back(health);
-	}
-	playerLife = Entity(-0.3, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize)}), Life, false);
-
-	solidTiles = std::unordered_set<int>(Solids);
-	
+//Loads all the music files for the game
+void GameState::loadMusic()
+{
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	bgm = Mix_LoadMUS("Running.mp3");
 	menuMusic = Mix_LoadMUS("MenuMusic.mp3");
@@ -36,6 +20,28 @@ void GameState::loadResources() {
 	doorOpen = Mix_LoadWAV("doorOpen.wav");
 	splash = Mix_LoadWAV("splash.wav");
 	lava = Mix_LoadWAV("Lava.wav");
+}
+
+//Loads the required resources for the entities
+void GameState::loadResources() {
+	TextureID = LoadTexture(RESOURCE_FOLDER"spritesheet_rgba.png");
+	fontTextureID = LoadTexture(RESOURCE_FOLDER"font1.png");
+	menuMap.Load(menuFILE);
+	map1.Load(level1FILE);
+	map2.Load(level2FILE);
+	map3.Load(level3FILE);
+	player = Player(0, 0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }));
+
+	for (int i = 0; i < 3; ++i) {
+		Entity health = Entity(-16 + i, 9.0, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 373, tileSize), createSheetSpriteBySpriteIndex(TextureID, 375, tileSize) }), false);
+		health.size = Vector4(1.0,1.0,1.0);
+		health.setResetProperties();
+		healthSprites.emplace_back(health);
+	}
+	playerLife = Entity(-0.3, -0.03, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 172, tileSize)}), false);
+
+	solidTiles = std::unordered_set<int>(Solids);
+	loadMusic();
 }
 
 FlareMap & GameState::chooseMap()
@@ -86,8 +92,8 @@ void GameState::goToNextLevel() {
 	switch (mode) {
 		case Menu:
 			//Resets the player's lives and hp after every playthrough
-			lives = 3;
-			playerHealth = 3;
+			player.lives = 3;
+			player.health = 3;
 			for (int i = 0; i < healthSprites.size(); ++i) {
 				healthSprites[i].reset();
 			}
@@ -141,26 +147,25 @@ void GameState::playBackgroundMusic() const{
 	Mix_VolumeMusic(20);
 	Mix_HaltMusic();
 	switch (mode) {
-	case Menu:
-	//case Instruction:
-		Mix_PlayMusic(menuMusic, -1);
-		break;
-	case Level1:
-		Mix_PlayMusic(L1Music, -1);
-		break;
-	case Level2:
-		Mix_PlayMusic(L2Music, -1);
-		break;
-	case Level3:
-		Mix_PlayMusic(L3Music, -1);
-		break;
-	case Victory:
-		Mix_PlayMusic(victoryMusic, -1);
-		break;
-	case Defeat:
-		Mix_PlayMusic(gameOverMusic, -1);
-		break;
-	}
+		case Menu:
+			Mix_PlayMusic(menuMusic, -1);
+			break;
+		case Level1:
+			Mix_PlayMusic(L1Music, -1);
+			break;
+		case Level2:
+			Mix_PlayMusic(L2Music, -1);
+			break;
+		case Level3:
+			Mix_PlayMusic(L3Music, -1);
+			break;
+		case Victory:
+			Mix_PlayMusic(victoryMusic, -1);
+			break;
+		case Defeat:
+			Mix_PlayMusic(gameOverMusic, -1);
+			break;
+		}
 }
 
 //Resets the states of all entities in the GameState
@@ -187,7 +192,7 @@ void GameState::resetEntities()
 
 //Resets players and entities upon death
 void GameState::playerDeath() {
-	playerHealth = 3;
+	player.health = 3;
 	invulTime = 0;
 	animationElapsed = 0;
 	playerHasDied = true;
@@ -201,9 +206,9 @@ void GameState::playerDeath() {
 	if (playerHasKey) {
 		resetKey();
 	}
-	lives -= 1;
+	player.lives -= 1;
 	//player has no lives left; game over
-	if (!lives) {
+	if (!player.lives) {
 		mode = Defeat;
 		playBackgroundMusic();
 	}
@@ -353,13 +358,13 @@ void GameState::updateLevel(float elapsed)
 		//Player loses health when touches an enemy
 		for (int i = 0; i < enemies.size(); ++i) {
 			if (invulTime <= 0 && player.SATCollidesWith(enemies[i], penetration)) {
-				playerHealth -= 1;
-				healthSprites[playerHealth].spriteIndex += 1;
+				player.health -= 1;
+				healthSprites[player.health].spriteIndex += 1;
 				invulTime = 1.5;
 				Mix_PlayChannel(-1, ghost, 0);
 			}
 		}
-		if (playerHealth < 1) playerDeath();
+		if (player.health < 1) playerDeath();
 
 		//Player restarts when touches water
 		int gridX, gridY;
@@ -505,6 +510,9 @@ void GameState::processEvents(SDL_Event &event) {
 				player.isStatic = !player.isStatic;
 			}
 			if (event.key.keysym.scancode == SDL_SCANCODE_N) {
+				if (playerHasKey) {
+					resetKey();
+				}
 				goToNextLevel();
 			}
 			break;
@@ -526,11 +534,13 @@ bool GameState::checkEntityOutOfBounds(const Entity & other)
 void GameState::PlaceEntity(std::string type, float x, float y)
 {
 	if (type == "Player") {
-		player = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 109, tileSize), createSheetSpriteBySpriteIndex(TextureID, 119, tileSize), createSheetSpriteBySpriteIndex(TextureID, 118, tileSize) }), Player, false);
+		player.Position = Vector4(x,y,0);
+		player.velocity = Vector4(0, 0, 0);
+		player.acceleration = Vector4(0, 0, 0);
 		player.setResetProperties();
 	}
 	else if (type == "Enemy") {
-		Entity enemy = Entity(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }), Enemy, false);
+		Enemy enemy = Enemy(x, y, std::vector<SheetSprite>({createSheetSpriteBySpriteIndex(TextureID, 445, tileSize) }));
 		enemy.acceleration.x = -0.5;
 		enemy.setResetProperties();
 		enemy.forward = true;
@@ -549,19 +559,19 @@ void GameState::PlaceEntity(std::string type, float x, float y)
 		platforms.emplace_back(plat);
 	}
 	else if (type == "Box") {
-		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 191, tileSize) }), Box, false);
+		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 191, tileSize) }), false);
 		box.setResetProperties();
 		boxes.emplace_back(box);
 	}
 	else if (type == "Ice") {
-		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 491, tileSize) }), Box, false);
+		Entity box = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 491, tileSize) }), false);
 		box.setResetProperties();
 		boxes.emplace_back(box);
 	}
 	else if (type == "MushroomTile") {
-		mushroomTile = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 130, tileSize), createSheetSpriteBySpriteIndex(TextureID, 160, tileSize) }), Box, true);
+		mushroomTile = Entity(x, y, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 130, tileSize), createSheetSpriteBySpriteIndex(TextureID, 160, tileSize) }), true);
 		mushroomTile.setResetProperties();
-		mushroom = Entity(x, y+0.1, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 108, tileSize) }), Mushroom, true);
+		mushroom = Entity(x, y+0.1, std::vector<SheetSprite>({ createSheetSpriteBySpriteIndex(TextureID, 108, tileSize) }), true);
 		mushroom.alpha = 0.0f;
 		mushroom.setResetProperties();
 	}
@@ -575,11 +585,11 @@ void GameState::RenderLevelIntro(ShaderProgram& program) {
 	if (playerHasDied) {
 		float oldLivesAlpha = mapValue(0.75 - animationElapsed, 0, 0.75, 0.0, 1.0);
 		float newLivesAlpha = mapValue(animationElapsed, 0.25, 1.0, 0.0, 1.0);
-		DrawMessage(program, fontTextureID, std::to_string(lives + 1), 0.3f, 0.0f, 0.3f, -0.15f, oldLivesAlpha);
-		DrawMessage(program, fontTextureID, std::to_string(lives), 0.3f, 0.0f, 0.3f, -0.15f, newLivesAlpha);
+		DrawMessage(program, fontTextureID, std::to_string(player.lives + 1), 0.3f, 0.0f, 0.3f, -0.15f, oldLivesAlpha);
+		DrawMessage(program, fontTextureID, std::to_string(player.lives), 0.3f, 0.0f, 0.3f, -0.15f, newLivesAlpha);
 	}
 	else {
-		DrawMessage(program, fontTextureID, std::to_string(lives), 0.3f, 0.0f, 0.3f, -0.15f, 1.0f);
+		DrawMessage(program, fontTextureID, std::to_string(player.lives), 0.3f, 0.0f, 0.3f, -0.15f, 1.0f);
 	}
 }
 
