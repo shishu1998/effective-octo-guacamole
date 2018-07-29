@@ -8,6 +8,7 @@ Libraries/Resources Used:
 * glew
 * Basic boilerplate code from [Professor Ivan Safrin](https://github.com/ivansafrin)
 * Game Assets from [Kenney](www.kenney.nl)
+* Maps made using [Tiled](https://www.mapeditor.org/)
 
 Instructions on how to play the game:
 1. Clone the repository
